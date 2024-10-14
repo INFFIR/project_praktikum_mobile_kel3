@@ -33,6 +33,17 @@ dependencies:
   image_picker: ^0.8.7
   cupertino_icons: ^1.0.8
   get: ^4.6.6
+  flutter_bloc: ^8.1.6
+  awesome_dialog: ^3.2.1
+  intl: ^0.19.0
+  dropdown_search: ^6.0.1
+  dartz: ^0.10.1
+  shared_preferences: ^2.3.2
+  webview_flutter: ^4.10.0
+  google_fonts: ^6.2.1
+  freezed_annotation: ^2.4.4
+  bloc: ^8.1.4
+  http: ^1.2.2
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
