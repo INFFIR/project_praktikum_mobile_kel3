@@ -27,7 +27,7 @@ class AppPages {
     ),    
     GetPage(
       name: Routes.home,
-      page: () => const MyHomePage(),
+      page: () => const HomePage(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
   ];
