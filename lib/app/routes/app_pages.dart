@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
@@ -29,6 +30,11 @@ class AppPages {
     GetPage(
       name: Routes.home,
       page: () => const HomePage(),
+      transition: Transition.fadeIn, // Optional: Add transition effect
+    ),
+        GetPage(
+      name: Routes.DetailProduct,
+      page: () => DetailProductPage(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
   ];

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 class DetailProductPage extends StatefulWidget {
+  const DetailProductPage({super.key});
+
   @override
   _DetailProductPageState createState() => _DetailProductPageState();
 }
 
 class _DetailProductPageState extends State<DetailProductPage> {
   // Image is now a static asset instead of being picked
-  final String _imageAssetPath = 'assets/images/sample_product.jpg';
+  final String _imageAssetPath = 'assets/product/product0.jpg';
 
   @override
   Widget build(BuildContext context) {

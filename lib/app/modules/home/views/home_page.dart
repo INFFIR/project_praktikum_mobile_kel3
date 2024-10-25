@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'dart:async';
+
+import 'package:project_praktikum_mobile_kel3/app/modules/open_product/view/open_product_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -231,29 +234,13 @@ Widget _buildProductGrid() {
     );
   }
 
-  void _showProductDetails(int index) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(_products[index]['name']),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text('Price: ${_products[index]['price']}'),
-              Text('Likes: ${_products[index]['likes']}'),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Close'),
-            ),
-          ],
-        );
-      },
-    );
-  }
+void _showProductDetails(int index) {
+  Get.to(
+    () => OpenProductPage(
+      productName: _products[index]['name'],
+      productPrice: 'Rp.${_products[index]['price']},-',
+      productLikes: _products[index]['likes'],
+    ),
+  );
+}
 }
