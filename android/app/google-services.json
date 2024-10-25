@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "56727432724",
+    "project_id": "praktikum-mobile-kel3-b1e1c",
+    "storage_bucket": "praktikum-mobile-kel3-b1e1c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:56727432724:android:2b4dbb905a395f6d088101",
+        "android_client_info": {
+          "package_name": "com.example.project_praktikum_mobile_kel3"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBFxG8JdXAhcU3pYd7a3kD3B9XKuM1psW8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
