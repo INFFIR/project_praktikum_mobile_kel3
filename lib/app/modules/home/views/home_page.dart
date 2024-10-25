@@ -1,26 +1,29 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io'; // Import untuk menggunakan tipe data File
+import 'dart:async';
 
-// Widget Stateful untuk halaman utama
-class MyHomePage extends StatefulWidget {
-  const MyHomePage({super.key});
+class HomePage extends StatefulWidget {
+  const HomePage({super.key});
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _HomePageState createState() => _HomePageState();
 }
 
-// State untuk MyHomePage
-class _MyHomePageState extends State<MyHomePage> {
-  final ImagePicker _picker = ImagePicker(); // Instance ImagePicker untuk memilih gambar
+class _HomePageState extends State<HomePage> {
+  final List<String> _promoImages = [
+    'assets/promo/promo1.jpg',
+    'assets/promo/promo2.jpg',
+    'assets/promo/promo3.jpg',
+  ];
 
-  // List untuk menyimpan gambar promo, dimulai dengan nilai null sebagai placeholder
-  final List<File?> _promoImages = List<File?>.filled(3, null);
+  final List<String> _productImages = [
+    'assets/product/product0.jpg',
+    'assets/product/product1.jpg',
+    'assets/product/product2.jpg',
+    'assets/product/product3.jpg',
+    'assets/product/product4.jpg',
+    'assets/product/product5.jpg',
+  ];
 
-  // List untuk menyimpan gambar produk, dimulai dengan nilai null sebagai placeholder
-  final List<File?> _productImages = List<File?>.filled(6, null);
-
-  // Daftar produk dengan nama dan harga
   final List<Map<String, dynamic>> _products = [
     {'name': 'Produk A', 'price': 'Rp 50.000', 'likes': 100},
     {'name': 'Produk B', 'price': 'Rp 75.000', 'likes': 200},
@@ -30,150 +33,227 @@ class _MyHomePageState extends State<MyHomePage> {
     {'name': 'Produk F', 'price': 'Rp 200.000', 'likes': 400},
   ];
 
-  // Status apakah produk difavoritkan
   final List<bool> _isFavorited = List<bool>.filled(6, false);
+  late PageController _pageController;
+  Timer? _timer;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+
+    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
+      if (_pageController.page!.round() < _promoImages.length - 1) {
+        _pageController.nextPage(
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } else {
+        _pageController.jumpToPage(0);
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    _timer?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Aplikasi Mobile'), // Judul di AppBar
+        title: const Text('Aplikasi Mobile'),
         actions: [
           IconButton(
             icon: const Icon(Icons.person),
             onPressed: () {
-              // Tambahkan aksi untuk tombol profile jika diperlukan
+              // Profile button action
             },
           ),
         ],
       ),
-      // Isi utama halaman menggunakan SingleChildScrollView untuk scrollable layout
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildPromoBanner(), // Membangun bagian promo banner
-            _buildProductGrid(), // Membangun bagian grid produk
+            _buildPromoSection(),
+            _buildProductGrid(),
           ],
         ),
       ),
     );
   }
 
-  // Fungsi untuk membangun widget promo banner
+  Widget _buildPromoSection() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: const Text(
+            "Hello there",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
+          ),
+        ),
+        _buildPromoBanner(),
+        Container(
+          padding: const EdgeInsets.all(8.0),
+          child: const Text(
+            "Popular choice",
+            style: TextStyle(
+              fontSize: 18,
+              fontStyle: FontStyle.italic,
+              color: Colors.grey,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
   Widget _buildPromoBanner() {
     return SizedBox(
-      height: 200,
+      height: 250,
       child: PageView.builder(
-        itemCount: _promoImages.length, // Jumlah halaman sesuai dengan panjang _promoImages
+        controller: _pageController,
+        itemCount: _promoImages.length,
         itemBuilder: (context, index) {
-          return Stack(
-            children: [
-              // Menampilkan gambar promo, baik dari file atau gambar default
-              _promoImages[index] != null
-                  ? Image.file(
-                      _promoImages[index]!,
-                      fit: BoxFit.cover,
-                      width: double.infinity,
-                    )
-                  : Image.asset(
-                      'assets/promo/promo${index + 1}.jpg',
-                    ),
-              // Tombol untuk mengganti gambar promo
-              Positioned(
-                bottom: 10,
-                right: 10,
-                child: ElevatedButton(
-                  onPressed: () => _pickImage(index), // Memanggil fungsi _pickImage
-                  child: const Text('Ganti Gambar'),
-                ),
-              ),
-            ],
+          return GestureDetector(
+            onTap: () {
+              _showPromoDetails();
+            },
+            child: Image.asset(
+              _promoImages[index],
+              fit: BoxFit.cover,
+              width: double.infinity,
+            ),
           );
         },
       ),
     );
   }
 
-  // Fungsi untuk membangun grid produk
-  Widget _buildProductGrid() {
-    return GridView.builder(
-      shrinkWrap: true, // Agar GridView mengikuti konten
-      physics: const NeverScrollableScrollPhysics(), // Menonaktifkan scroll di dalam GridView
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2, // Jumlah kolom dalam grid
-        childAspectRatio: 1, // Rasio aspek untuk item grid
-      ),
-      itemCount: _productImages.length, // Jumlah item produk
-      itemBuilder: (context, index) {
-        return Card(
-          child: Column(
-            children: [
-              Expanded(
-                // Menampilkan gambar produk, baik dari file atau gambar default
-                child: _productImages[index] != null
-                    ? Image.file(
-                        _productImages[index]!,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                      )
-                    : Image.asset(
-                        'assets/product/product$index.jpg',
-                        fit: BoxFit.cover,
-                      ),
-              ),
-              Text(_products[index]['name']), // Nama produk dari daftar
-              Text(_products[index]['price']), // Harga produk dari daftar
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      _isFavorited[index] ? Icons.favorite : Icons.favorite_border, // Ikon berubah saat ditekan
-                      color: _isFavorited[index] ? Colors.red : null, // Ubah warna jika difavoritkan
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _isFavorited[index] = !_isFavorited[index]; // Toggle status favorit
-                        if (_isFavorited[index]) {
-                          _products[index]['likes']++; // Tambah jumlah like
-                        } else {
-                          _products[index]['likes']--; // Kurangi jumlah like
-                        }
-                      });
-                    },
+Widget _buildProductGrid() {
+  return GridView.builder(
+    padding: const EdgeInsets.all(20.0), // Padding untuk GridView
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      childAspectRatio: 0.8,
+      crossAxisSpacing: 8.0,
+      mainAxisSpacing: 8.0,
+    ),
+    itemCount: _productImages.length,
+    itemBuilder: (context, index) {
+      return Padding(
+        padding: const EdgeInsets.all(5.0), // Padding di sekitar setiap kartu
+        child: GestureDetector(
+          onTap: () {
+            _showProductDetails(index);
+          },
+          child: Card(
+            child: Column(
+              children: [
+                Expanded(
+                  child: Image.asset(
+                    _productImages[index],
+                    fit: BoxFit.cover,
+                    width: double.infinity,
                   ),
-                  Text('${_products[index]['likes']}'), // Jumlah like produk
-                ],
-              ),
-              // Tombol untuk mengganti gambar produk
-              ElevatedButton(
-                onPressed: () => _pickProductImage(index), // Memanggil fungsi _pickProductImage
-                child: const Text('Ganti Gambar'),
-              ),
-            ],
+                ),
+                Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    children: [
+                      Text(_products[index]['name']),
+                      Text(_products[index]['price']),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              _isFavorited[index]
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: _isFavorited[index] ? Colors.red : null,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                _isFavorited[index] = !_isFavorited[index];
+                                if (_isFavorited[index]) {
+                                  _products[index]['likes']++;
+                                } else {
+                                  _products[index]['likes']--;
+                                }
+                              });
+                            },
+                          ),
+                          Text('${_products[index]['likes']}'),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
+        ),
+      );
+    },
+  );
+}
+
+
+
+  void _showPromoDetails() {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Promo Detail"),
+          content: const Text("This is a special promo just for you!"),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
         );
       },
     );
   }
 
-  // Fungsi untuk memilih gambar promo dari galeri
-  Future<void> _pickImage(int index) async {
-    final pickedFile = await _picker.getImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _promoImages[index] = File(pickedFile.path); // Menyimpan gambar ke list _promoImages
-      });
-    }
-  }
-
-  // Fungsi untuk memilih gambar produk dari galeri
-  Future<void> _pickProductImage(int index) async {
-    final pickedFile = await _picker.getImage(source: ImageSource.gallery);
-    if (pickedFile != null) {
-      setState(() {
-        _productImages[index] = File(pickedFile.path); // Menyimpan gambar ke list _productImages
-      });
-    }
+  void _showProductDetails(int index) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(_products[index]['name']),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('Price: ${_products[index]['price']}'),
+              Text('Likes: ${_products[index]['likes']}'),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Close'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }

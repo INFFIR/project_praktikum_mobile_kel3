@@ -21,7 +21,7 @@ class LoginController extends GetxController {
       print('Password: ${passwordController.text}');
 
       // Simulasi sukses login (anda bisa mengganti ini dengan logika autentikasi nyata)
-      await Future.delayed(Duration(seconds: 2)); // Simulate a network call
+      await Future.delayed(const Duration(seconds: 2)); // Simulate a network call
 
       // Assume login is successful for this example
       return true; 
