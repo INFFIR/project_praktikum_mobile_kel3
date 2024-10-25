@@ -1,22 +1,23 @@
 import 'package:flutter/material.dart';
-import 'package:get/get_navigation/src/root/get_material_app.dart';
-import './app/modules/home/views/home_page.dart'; // Import halaman utama dari file home_page.dart
+import 'package:get/get.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/welcome/view/welcome_page.dart';
+import './app/routes/app_pages.dart'; // Ensure this path is correct based on your folder structure
 
-// Fungsi utama aplikasi
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
-// Widget utama aplikasi
 class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'Aplikasi Mobile', // Judul aplikasi
-      theme: ThemeData(primarySwatch: Colors.blue), // Tema aplikasi
-      home: const MyHomePage(), // Halaman awal aplikasi diambil dari home_page.dart
+      title: 'Vape Store',
+      initialRoute: AppPages.initial,
+      getPages: AppPages.routes,
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: const WelcomePage(), // This can also be removed if you are using initialRoute
     );
   }
 }

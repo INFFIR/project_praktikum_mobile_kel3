@@ -1,13 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../controllers/home_controller.dart';
+class WelcomePage extends StatelessWidget {
+  const WelcomePage({super.key});
 
-class HomeView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HomeController controller =
-        Get.find<HomeController>(); // Ambil controller menggunakan Get.find()
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: SafeArea(
@@ -15,46 +12,34 @@ class HomeView extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: <Widget>[
-              GestureDetector(
-                onTap: () {
-                  controller.pickImage(); // Ambil gambar saat logo di-tap
-                },
-                child: Obx(() {
-                  // Observer untuk perubahan gambar
-                  return controller.image.value != null
-                      ? Image.file(
-                          controller.image.value!,
-                          height: 150,
-                        )
-                      : Image.asset(
-                          'assets/logo_vape_store.png', // Gambar default
-                          height: 150,
-                        );
-                }),
+              // Static Image instead of Image Picker
+              Image.asset(
+                'assets/promo/promo1.jpg', // Replace with your image asset path
+                height: 150,
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // Nama Toko
-              Text(
+              // Store Name
+              const Text(
                 'SM Vape Store',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
 
-              // Lokasi
-              Text(
+              // Location
+              const Text(
                 'Malang',
                 style: TextStyle(
                   fontSize: 20,
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               // Catchphrase
-              Text(
+              const Text(
                 'IM NOT SMOKING\nIM VAPING\nNO NIC NO LIFE',
                 textAlign: TextAlign.center,
                 style: TextStyle(
@@ -62,9 +47,9 @@ class HomeView extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              // Deskripsi
+              // Description
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
@@ -73,21 +58,22 @@ class HomeView extends StatelessWidget {
                   style: TextStyle(fontSize: 16, color: Colors.grey[700]),
                 ),
               ),
-              SizedBox(height: 40),
+              const SizedBox(height: 40),
 
-              // Tombol Get Started
+              // Get Started Button
               ElevatedButton(
                 onPressed: () {
-                  // Tambahkan logika untuk navigasi atau aksi lain
+                  // Add navigation logic or other actions here
+                  Get.toNamed("");
                 },
                 style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
                   backgroundColor: Colors.black,
                 ),
-                child: Text(
+                child: const Text(
                   'Get Started',
                   style: TextStyle(
                     fontSize: 18,
