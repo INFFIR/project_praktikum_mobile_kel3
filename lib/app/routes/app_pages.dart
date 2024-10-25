@@ -1,4 +1,7 @@
 import 'package:get/get.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/welcome/view/welcome_page.dart'; // Ensure this path is correct based on your folder structure
 
@@ -12,5 +15,20 @@ class AppPages {
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     // Add more routes here as needed
+      GetPage(
+      name: Routes.login,
+      page: () => LoginPage(),
+      binding: LoginBinding(),
+    ),
+    GetPage(
+      name: Routes.signUp,
+      page: () => const WelcomePage(),
+      transition: Transition.fadeIn, // Optional: Add transition effect
+    ),    
+    GetPage(
+      name: Routes.home,
+      page: () => const MyHomePage(),
+      transition: Transition.fadeIn, // Optional: Add transition effect
+    ),
   ];
 }

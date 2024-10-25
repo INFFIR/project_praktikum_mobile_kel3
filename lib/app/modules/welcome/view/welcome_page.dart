@@ -64,7 +64,7 @@ class WelcomePage extends StatelessWidget {
               ElevatedButton(
                 onPressed: () {
                   // Add navigation logic or other actions here
-                  Get.toNamed("");
+                  Get.toNamed("/login");
                 },
                 style: ElevatedButton.styleFrom(
                   padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 15),
