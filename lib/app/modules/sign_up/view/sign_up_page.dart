@@ -8,8 +8,8 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import '../controllers/edit_profile_controller.dart';
 
-class EditProfileScreen extends StatelessWidget {
-  EditProfileScreen({Key? key}) : super(key: key);
+class signUpPage extends StatelessWidget {
+  signUpPage({Key? key}) : super(key: key);
 
   final EditProfileController controller = Get.put(EditProfileController());
 
