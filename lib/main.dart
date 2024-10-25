@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get_navigation/src/root/get_material_app.dart';
 import './app/modules/home/views/home_page.dart'; // Import halaman utama dari file home_page.dart
 
 // Fungsi utama aplikasi
@@ -12,7 +13,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Aplikasi Mobile', // Judul aplikasi
       theme: ThemeData(primarySwatch: Colors.blue), // Tema aplikasi
       home: const MyHomePage(), // Halaman awal aplikasi diambil dari home_page.dart
