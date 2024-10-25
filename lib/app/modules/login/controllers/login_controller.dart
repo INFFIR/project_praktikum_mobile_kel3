@@ -1,38 +1,49 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 class LoginController extends GetxController {
-  // Initialize controllers for email and password input
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
 
   @override
   void onInit() {
     super.onInit();
-    // Additional initialization if needed
   }
 
-  // Simulate a login process
+  // Implement Firebase Authentication login
   Future<bool> login() async {
-    // Check if the input fields are not empty
+  try {
     if (emailController.text.isNotEmpty && passwordController.text.isNotEmpty) {
-      // Logika login di sini (misalnya panggilan API)
-      print('Email: ${emailController.text}');
-      print('Password: ${passwordController.text}');
+      // Firebase Authentication sign-in
+      UserCredential userCredential = await _auth.signInWithEmailAndPassword(
+        email: emailController.text,
+        password: passwordController.text,
+      );
 
-      // Simulasi sukses login (anda bisa mengganti ini dengan logika autentikasi nyata)
-      await Future.delayed(Duration(seconds: 2)); // Simulate a network call
+      // Dapatkan informasi pengguna setelah login berhasil
+      User? user = userCredential.user;
+      if (user != null) {
+        print('Logged in user: ${user.email} with UID: ${user.uid}');
+      }
 
-      // Assume login is successful for this example
-      return true; 
+      // Login successful
+      return true;
     }
-    // Return false if login fails
-    return false;
+  } on FirebaseAuthException catch (e) {
+    // Handle Firebase Authentication errors
+    if (e.code == 'user-not-found') {
+      Get.snackbar('Error', 'No user found for that email.');
+    } else if (e.code == 'wrong-password') {
+      Get.snackbar('Error', 'Wrong password provided.');
+    }
   }
+  return false;
+}
 
   @override
   void onClose() {
-    // Clean up controllers when the widget is removed
     emailController.dispose();
     passwordController.dispose();
     super.onClose();

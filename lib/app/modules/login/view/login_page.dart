@@ -85,7 +85,12 @@ class LoginPage extends StatelessWidget {
                     if (success) {
                       Get.toNamed("/home"); // Use Get.to() for navigation
                     } else {
-                      // Handle login failure
+                      Get.snackbar(
+                      'Login Failed',
+                      'Please check your email and password.',
+                      snackPosition: SnackPosition.BOTTOM,
+
+                      );
                     }
                   });
                 },
@@ -106,12 +111,13 @@ class LoginPage extends StatelessWidget {
             ),
             const Spacer(),
             Center(
+              
               child: Image.asset(
-                'assets/promo/promo1.jpg',
+                'assets/google.png',
                 height: 30,
               ),
             ),
-            const SizedBox(height: 40),
+            const SizedBox(height: 350),
           ],
         ),
       ),
