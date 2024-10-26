@@ -1,14 +1,14 @@
-// product_card.dart
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 class ProductCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
-  final int likes;
-  final bool isFavorited;
+  final RxInt likes;
+  final RxBool isFavorited;
   final VoidCallback onFavoriteToggle;
-  final VoidCallback onTap; // Parameter baru untuk navigasi
+  final VoidCallback onTap;
 
   const ProductCard({
     super.key,
@@ -18,21 +18,32 @@ class ProductCard extends StatelessWidget {
     required this.likes,
     required this.isFavorited,
     required this.onFavoriteToggle,
-    required this.onTap, // Parameter baru
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
+    // Gambar default jika gambar tidak ditemukan
+    final String displayImage = image.isNotEmpty ? image : 'assets/product/default.jpg';
+
     return GestureDetector(
-      onTap: onTap, // Menggunakan onTap untuk navigasi
+      onTap: onTap,
       child: Card(
         child: Column(
           children: [
             Expanded(
               child: Image.asset(
-                image,
+                displayImage,
                 fit: BoxFit.cover,
                 width: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  // Menampilkan gambar default jika terjadi error
+                  return Image.asset(
+                    'assets/product/default.jpg',
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                  );
+                },
               ),
             ),
             Padding(
@@ -40,7 +51,7 @@ class ProductCard extends StatelessWidget {
               child: Column(
                 children: [
                   Text(
-                    name,
+                    name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
                     style: const TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
@@ -48,21 +59,23 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    price,
+                    price.isNotEmpty ? price : 'Harga Tidak Tersedia',
                     style: const TextStyle(fontSize: 14),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      IconButton(
-                        icon: Icon(
-                          isFavorited ? Icons.favorite : Icons.favorite_border,
-                          color: isFavorited ? Colors.red : null,
+                  Obx(
+                    () => Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        IconButton(
+                          icon: Icon(
+                            isFavorited.value ? Icons.favorite : Icons.favorite_border,
+                            color: isFavorited.value ? Colors.red : null,
+                          ),
+                          onPressed: onFavoriteToggle,
                         ),
-                        onPressed: onFavoriteToggle,
-                      ),
-                      Text('$likes'),
-                    ],
+                        Text('${likes.value}'),
+                      ],
+                    ),
                   ),
                 ],
               ),

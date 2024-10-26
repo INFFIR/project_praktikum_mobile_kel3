@@ -1,118 +1,181 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../product/controllers/product_controller.dart';
 
 class OpenProductPage extends StatelessWidget {
-  final String productName;
-  final String productPrice;
-  final int productLikes;
+  final int productIndex;
+  final ProductController productController = Get.find();
 
-  const OpenProductPage({
+  OpenProductPage({
     super.key,
-    required this.productName,
-    required this.productPrice,
-    required this.productLikes,
+    required this.productIndex,
   });
 
   @override
   Widget build(BuildContext context) {
+    final product = productController.products[productIndex];
+    final isFavorited = productController.isFavorited[productIndex];
+    final likes = product['likes'] ?? 0.obs;
+
+    // Menangani data yang hilang
+    final String name = product['name'] ?? 'Nama Produk Tidak Tersedia';
+    final String price = product['price'] ?? 'Harga Tidak Tersedia';
+    final String imagePath = productController.productImages[productIndex].isNotEmpty
+        ? productController.productImages[productIndex]
+        : 'assets/product/default.jpg';
+
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(
-            IconData(0xe094, fontFamily: 'MaterialIcons', matchTextDirection: true),
+            Icons.arrow_back,
             color: Colors.black,
           ),
           onPressed: () {
-            Get.back(); // Menggunakan GetX untuk kembali ke halaman sebelumnya
+            Get.back();
           },
         ),
-        title: const Text('Splash Some Color'),
+        title: Text(
+          name,
+          style: const TextStyle(
+            color: Colors.black,
+            fontSize: 20,
+            fontFamily: 'Times New Roman',
+          ),
+        ),
         backgroundColor: Colors.white,
         elevation: 0,
-        titleTextStyle: const TextStyle(
-          color: Colors.black,
-          fontSize: 20,
-          fontFamily: 'Times New Roman',
-        ),
         centerTitle: true,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.favorite_border, color: Colors.black),
-            onPressed: () {
-              print('Favorite icon pressed');
-            },
+          Obx(
+            () => IconButton(
+              icon: Icon(
+                isFavorited.value ? Icons.favorite : Icons.favorite_border,
+                color: isFavorited.value ? Colors.red : Colors.black,
+              ),
+              onPressed: () {
+                productController.toggleFavorite(productIndex);
+              },
+            ),
           ),
         ],
       ),
       body: Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 240,
-              height: 240,
-              decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 255, 255, 255),
-                borderRadius: BorderRadius.circular(12),
-                image: const DecorationImage(
-                  image: AssetImage('assets/promo/promo1.jpg'), // Ganti dengan jalur aset gambar Anda
-                  fit: BoxFit.cover,
+        child: SingleChildScrollView( // Menggunakan SingleChildScrollView jika konten melebihi layar
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Gambar Produk
+              Container(
+                width: 240,
+                height: 240,
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(12),
+                  image: DecorationImage(
+                    image: AssetImage(imagePath),
+                    fit: BoxFit.cover,
+                    onError: (error, stackTrace) {
+                      // Menampilkan gambar default jika terjadi error
+                      AssetImage('assets/product/default.jpg');
+                    },
+                  ),
                 ),
               ),
-              child: const Icon(
-                Icons.person,
-                size: 60,
-                color: Colors.white,
+              const SizedBox(height: 30),
+              // Nama Produk
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontFamily: 'Times New Roman',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
               ),
-            ),
-            const SizedBox(height: 30),
-            const SizedBox(height: 16),
-            Text(
-              productPrice,
-              style: const TextStyle(fontSize: 40, color: Colors.black, fontFamily: 'Times New Roman'),
-            ),
-            const SizedBox(height: 20),
-            const Text(
-              'Specifications',
-              style: TextStyle(
-                fontSize: 25,
-                color: Colors.black,
+              const SizedBox(height: 16),
+              // Harga Produk
+              Text(
+                'Rp $price,-',
+                style: const TextStyle(
+                  fontSize: 40,
+                  color: Colors.black,
+                  fontFamily: 'Times New Roman',
+                ),
               ),
-            ),
-            const SizedBox(height: 15),
-            const Text(
-              '\t\t\t\t Attractive design and colors\n'
-              '\t\t\t\t Battery built-in 800mah battery\n'
-              '\t\t\t\t Airflow adjustable\n'
-              '\t\t\t\t Type C fast charging productnation',
-              style: TextStyle(fontSize: 17, color: Colors.black, fontFamily: 'Times New Roman'),
-            ),
-            const SizedBox(height: 60),
-ElevatedButton(
-  onPressed: () {
-    // Tambahkan tindakan yang ingin dilakukan saat tombol ditekan di sini.
-    Get.toNamed("/detail_product"); // Use Get.to() for navigation
-   
-  },
-  style: ElevatedButton.styleFrom(
-    padding: const EdgeInsets.symmetric(vertical: 12),
-    shape: RoundedRectangleBorder(
-      borderRadius: BorderRadius.circular(15),
-    ),
-    backgroundColor: Colors.black, // Ubah warna tombol sesuai kebutuhan
-    side: const BorderSide(color: Colors.black54), // Warna border
-  ),
-  child: const Text(
-    'Buy Now',
-    style: TextStyle(
-      fontSize: 18,
-      color: Colors.white, // Ubah warna teks sesuai kebutuhan
-      fontWeight: FontWeight.bold,
-    ),
-  ),
-),
-
-          ],
+              const SizedBox(height: 20),
+              // Jumlah Likes
+              Obx(
+                () => Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(
+                      Icons.favorite,
+                      color: isFavorited.value ? Colors.red : Colors.grey,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      '${likes.value} likes',
+                      style: const TextStyle(
+                        fontSize: 18,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Spesifikasi
+              const Text(
+                'Specifications',
+                style: TextStyle(
+                  fontSize: 25,
+                  color: Colors.black,
+                ),
+              ),
+              const SizedBox(height: 15),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  'Attractive design and colors\n'
+                  'Battery built-in 800mah battery\n'
+                  'Airflow adjustable\n'
+                  'Type C fast charging productnation',
+                  style: TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.left,
+                ),
+              ),
+              const SizedBox(height: 60),
+              // Tombol Buy Now
+              ElevatedButton(
+                onPressed: () {
+                  // Tindakan saat tombol ditekan
+                  Get.toNamed("/detail_product");
+                },
+                style: ElevatedButton.styleFrom(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  backgroundColor: Colors.black,
+                  side: const BorderSide(color: Colors.black54),
+                ),
+                child: const Text(
+                  'Buy Now',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
