@@ -5,6 +5,7 @@ import 'dart:async';
 import '../../open_product/view/open_product_page.dart';
 import '../../product/widgets/product_card.dart';
 import '../../product/widgets/promo_card.dart';
+import '../../components/bottom_navbar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -46,6 +47,7 @@ class _HomePageState extends State<HomePage> {
     'assets/product/product3.jpg',
     'assets/product/product4.jpg',
     'assets/product/product5.jpg',
+    'assets/product/product0.jpg',
   ];
 
   final List<Map<String, dynamic>> _products = [
@@ -55,6 +57,7 @@ class _HomePageState extends State<HomePage> {
     {'name': 'Splash all color', 'price': '900K', 'likes': 300},
     {'name': 'Splash some color (pink)', 'price': '330K', 'likes': 100},
     {'name': 'Splash some color (white)', 'price': '330K', 'likes': 200},
+    {'name': 'Splash some color (pink)', 'price': '330K', 'likes': 100},
   ];
 
   List<bool> _isFavorited = [];
@@ -62,12 +65,7 @@ class _HomePageState extends State<HomePage> {
   Timer? _timer;
   int _currentIndex = 0; // Untuk navigasi bottom navbar
 
-  final List<Widget> _pages = [
-    const HomePage(), // HomePage
-    const FavoritePage(), // Halaman Favorite (buat halaman ini)
-    const CartPage(), // Halaman Cart (buat halaman ini)
-    const ProfilePage(), // Halaman Profile (buat halaman ini)
-  ];
+
 
   @override
   void initState() {
@@ -102,36 +100,39 @@ class _HomePageState extends State<HomePage> {
   }
 
   @override
-  Widget build(BuildContext context) => Scaffold(
+          Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
-          title: const Text('Aplikasi Mobile'),
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.person),
-              onPressed: () {},
-            ),
-          ],
+          automaticallyImplyLeading: false,
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              IconButton(
+                icon: const Icon(Icons.menu),
+                onPressed: () {},
+              ),
+              IconButton(
+                icon: const Icon(Icons.person),
+                onPressed: () {},
+              ),
+            ],
+          ),
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
               // Bagian Hello There
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       'Hello There 👋',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: Colors.black,
                       ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.menu),
-                      onPressed: () {},
                     ),
                   ],
                 ),
@@ -217,95 +218,10 @@ class _HomePageState extends State<HomePage> {
             ],
           ),
         ),
-bottomNavigationBar: BottomNavigationBar(
-  currentIndex: _currentIndex,
-  onTap: (int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-
-    switch (index) {
-      case 0:
-        Get.toNamed('/home');
-        break;
-      case 1:
-        Get.toNamed('/home');
-        break;
-      case 2:
-        Get.toNamed('/home');
-        break;
-      case 3:
-        Get.toNamed('/home');
-        break;
-    }
-  },
-  items: const [
-    BottomNavigationBarItem(
-      icon: Icon(Icons.home),
-      label: 'Home',
-      backgroundColor: Colors.black,
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.favorite_border),
-      label: 'Favorites',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.shopping_cart),
-      label: 'Cart',
-    ),
-    BottomNavigationBarItem(
-      icon: Icon(Icons.person),
-      label: 'Profile',
-    ),
-  ],
-  selectedItemColor: Colors.black,
-  unselectedItemColor: Colors.grey,
-  type: BottomNavigationBarType.fixed,
-),
+      bottomNavigationBar: BottomNavBar(
+        currentIndex: _currentIndex,
+        onTap: onTabTapped,
+      ),
 
       );
-}
-
-// Anda perlu membuat halaman FavoritePage, CartPage, dan ProfilePage
-
-// favorite_page.dart
-
-class FavoritePage extends StatelessWidget {
-  const FavoritePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Favorites')),
-      body: const Center(child: Text('Your favorite items')),
-    );
-  }
-}
-
-// cart_page.dart
-
-class CartPage extends StatelessWidget {
-  const CartPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Cart')),
-      body: const Center(child: Text('Your cart items')),
-    );
-  }
-}
-
-// profile_page.dart
-
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
-      body: const Center(child: Text('Your profile')),
-    );
-  }
 }
