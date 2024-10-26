@@ -17,6 +17,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Vape Store',
+      debugShowCheckedModeBanner: false, // Disable the debug banner
       initialRoute: AppPages.initial,
       getPages: AppPages.routes,
       theme: ThemeData(

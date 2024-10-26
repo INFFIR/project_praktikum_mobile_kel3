@@ -8,7 +8,6 @@ import '../../components/bottom_navbar.dart';
 import '../../product/widgets/promo_card.dart';
 import 'home_admin_page.dart';
 
-
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -42,7 +41,7 @@ class _HomePageState extends State<HomePage> {
               ),
               IconButton(
                 icon: const Icon(Icons.person),
-                onPressed: () {},
+                onPressed: () => Get.toNamed('/profile'),
               ),
             ],
           ),
@@ -52,8 +51,7 @@ class _HomePageState extends State<HomePage> {
             children: [
               // Bagian Hello There
               const Padding(
-                padding:
-                    EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+                padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
@@ -119,10 +117,12 @@ class _HomePageState extends State<HomePage> {
                     itemCount: productController.products.length,
                     itemBuilder: (context, index) => ProductCard(
                       image: productController.productImages[index],
-                      name: productController.products[index]['name'] ?? 'Nama Produk Tidak Tersedia',
+                      name: productController.products[index]['name'] ??
+                          'Nama Produk Tidak Tersedia',
                       price:
                           'Rp ${productController.products[index]['price'] ?? 'Harga Tidak Tersedia'}',
-                      likes: productController.products[index]['likes'] ?? 0.obs,
+                      likes:
+                          productController.products[index]['likes'] ?? 0.obs,
                       isFavorited: productController.isFavorited[index],
                       onFavoriteToggle: () {
                         productController.toggleFavorite(index);
