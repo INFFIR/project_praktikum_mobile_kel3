@@ -33,8 +33,8 @@ class AppPages {
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
         GetPage(
-      name: Routes.DetailProduct,
-      page: () => DetailProductPage(),
+      name: Routes.detailProduct,
+      page: () => const DetailProductPage(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
   ];
