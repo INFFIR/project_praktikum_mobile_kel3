@@ -4,10 +4,11 @@ import 'package:project_praktikum_mobile_kel3/app/modules/home/bindings/home_bin
 import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
-import 'package:project_praktikum_mobile_kel3/app/modules/profile/bindings/profile_binding.dart';
-import 'package:project_praktikum_mobile_kel3/app/modules/profile/views/profile_view.dart';
-import 'package:project_praktikum_mobile_kel3/app/modules/sign_up/view/sign_up_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
+import '../modules/profile/bindings/profile_binding.dart';
+import '../modules/profile/views/profile_view.dart';
+import '../modules/sign_up/bindings/auth_binding.dart.dart';
+import '../modules/sign_up/view/sign_up_screen.dart.dart';
 import '../modules/welcome/view/welcome_page.dart';
 
 class AppPages {
@@ -27,7 +28,8 @@ class AppPages {
     ),
     GetPage(
       name: Routes.signUp,
-      page: () => signUpPage(),
+      page: () => SignUpScreen(),
+      binding: AuthBinding(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     GetPage(
