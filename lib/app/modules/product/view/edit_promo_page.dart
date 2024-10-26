@@ -1,4 +1,4 @@
-// add_promo_page.dart
+// edit_promo_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -7,21 +7,34 @@ import 'dart:io';
 
 import '../widgets/promo_card.dart';
 
-class AddPromoPage extends StatefulWidget {
-  const AddPromoPage({super.key});
+class EditPromoPage extends StatefulWidget {
+  final int promoIndex;
+  const EditPromoPage({super.key, required this.promoIndex});
 
   @override
-  _AddPromoPageState createState() => _AddPromoPageState();
+  _EditPromoPageState createState() => _EditPromoPageState();
 }
 
-class _AddPromoPageState extends State<AddPromoPage> {
+class _EditPromoPageState extends State<EditPromoPage> {
   final PromoController promoController = Get.find();
 
-  final TextEditingController titleController = TextEditingController();
-  final TextEditingController contentController = TextEditingController();
-  final TextEditingController labelController = TextEditingController();
-  final TextEditingController descriptionController = TextEditingController();
+  late final TextEditingController titleController;
+  late final TextEditingController contentController;
+  late final TextEditingController labelController;
+  late final TextEditingController descriptionController;
   File? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    final promo = promoController.promoItems[widget.promoIndex];
+
+    titleController = TextEditingController(text: promo.titleText);
+    contentController = TextEditingController(text: promo.contentText);
+    labelController = TextEditingController(text: promo.promoLabelText);
+    descriptionController = TextEditingController(text: promo.promoDescriptionText);
+    _image = null;
+  }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -39,9 +52,37 @@ class _AddPromoPageState extends State<AddPromoPage> {
 
   @override
   Widget build(BuildContext context) {
+    final promo = promoController.promoItems[widget.promoIndex];
+    final String currentImage = promo.image;
+
+    Widget imageWidget;
+
+    if (_image != null) {
+      imageWidget = Image.file(
+        _image!,
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    } else if (currentImage.startsWith('assets/')) {
+      imageWidget = Image.asset(
+        currentImage,
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    } else {
+      imageWidget = Image.file(
+        File(currentImage),
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Tambah Promo'),
+        title: const Text('Edit Promo'),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -51,23 +92,7 @@ class _AddPromoPageState extends State<AddPromoPage> {
               // Tampilan Gambar
               GestureDetector(
                 onTap: _pickImage,
-                child: _image != null
-                    ? Image.file(
-                        _image!,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      )
-                    : Container(
-                        height: 200,
-                        width: double.infinity,
-                        color: Colors.grey[300],
-                        child: const Icon(
-                          Icons.add_a_photo,
-                          color: Colors.white,
-                          size: 50,
-                        ),
-                      ),
+                child: imageWidget,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -97,12 +122,13 @@ class _AddPromoPageState extends State<AddPromoPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
-                  // Tambahkan promo baru ke controller
-                  promoController.addPromo(
+                  // Update promo di controller
+                  promoController.editPromo(
+                    widget.promoIndex,
                     PromoItem(
                       image: _image != null
                           ? _image!.path
-                          : 'assets/promo/default.jpg',
+                          : promo.image,
                       titleText: titleController.text,
                       contentText: contentController.text,
                       promoLabelText: labelController.text,

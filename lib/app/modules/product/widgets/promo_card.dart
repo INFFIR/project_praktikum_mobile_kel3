@@ -1,6 +1,8 @@
+// promo_section.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/promo_controller.dart';
+import 'dart:io';
 
 class PromoItem {
   final String image;
@@ -40,7 +42,7 @@ class PromoSection extends StatelessWidget {
                 // Menangani data yang hilang
                 final String imagePath = promoItem.image.isNotEmpty
                     ? promoItem.image
-                    : 'assets/promo/default.jpg'; // Gambar default promo
+                    : 'assets/promo/default.jpg';
                 final String titleText = promoItem.titleText.isNotEmpty
                     ? promoItem.titleText
                     : 'Promo Title';
@@ -53,6 +55,40 @@ class PromoSection extends StatelessWidget {
                 final String promoDescriptionText = promoItem.promoDescriptionText.isNotEmpty
                     ? promoItem.promoDescriptionText
                     : 'Promo Description';
+
+                Widget imageWidget;
+
+                if (imagePath.startsWith('assets/')) {
+                  imageWidget = Image.asset(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/promo/default.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      );
+                    },
+                  );
+                } else {
+                  imageWidget = Image.file(
+                    File(imagePath),
+                    fit: BoxFit.cover,
+                    width: double.infinity,
+                    height: double.infinity,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/promo/default.jpg',
+                        fit: BoxFit.cover,
+                        width: double.infinity,
+                        height: double.infinity,
+                      );
+                    },
+                  );
+                }
 
                 return Stack(
                   children: [
@@ -70,20 +106,7 @@ class PromoSection extends StatelessWidget {
                           ],
                         ),
                       ),
-                      child: Image.asset(
-                        imagePath,
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Image.asset(
-                            'assets/promo/default.jpg',
-                            fit: BoxFit.cover,
-                            width: double.infinity,
-                            height: double.infinity,
-                          );
-                        },
-                      ),
+                      child: imageWidget,
                     ),
                     // Bagian promoLabelText
                     Positioned(

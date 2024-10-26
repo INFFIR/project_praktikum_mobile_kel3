@@ -1,5 +1,5 @@
-// admin_product_card.dart
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class AdminProductCard extends StatelessWidget {
   final String image;
@@ -19,26 +19,40 @@ class AdminProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final String displayImage =
-        image.isNotEmpty ? image : 'assets/product/default.jpg';
+    Widget imageWidget;
+
+    if (image.startsWith('assets/')) {
+      imageWidget = Image.asset(
+        image,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    } else {
+      imageWidget = Image.file(
+        File(image),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    }
 
     return Card(
       child: Column(
         children: [
-          Expanded(
-            child: Image.asset(
-              displayImage,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              errorBuilder: (context, error, stackTrace) {
-                return Image.asset(
-                  'assets/product/default.jpg',
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                );
-              },
-            ),
-          ),
+          Expanded(child: imageWidget),
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: Column(

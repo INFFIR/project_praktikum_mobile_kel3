@@ -1,16 +1,32 @@
 // add_product_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../product/controllers/product_controller.dart';
+import 'dart:io';
 
-class AddProductPage extends StatelessWidget {
-  AddProductPage({super.key});
+class AddProductPage extends StatefulWidget {
+  const AddProductPage({super.key});
 
+  @override
+  _AddProductPageState createState() => _AddProductPageState();
+}
+
+class _AddProductPageState extends State<AddProductPage> {
   final ProductController productController = Get.find();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
-  // Tambahkan controller lain jika diperlukan
+  File? _image;
+
+  Future<void> _pickImage() async {
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+
+    setState(() {
+      _image = pickedFile != null ? File(pickedFile.path) : null;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -18,39 +34,62 @@ class AddProductPage extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Tambah Produk'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          children: [
-            TextField(
-              controller: nameController,
-              decoration: const InputDecoration(
-                labelText: 'Nama Produk',
+      body: SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            children: [
+              // Tampilan Gambar
+              GestureDetector(
+                onTap: _pickImage,
+                child: _image != null
+                    ? Image.file(
+                        _image!,
+                        height: 200,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      )
+                    : Container(
+                        height: 200,
+                        width: double.infinity,
+                        color: Colors.grey[300],
+                        child: const Icon(
+                          Icons.add_a_photo,
+                          color: Colors.white,
+                          size: 50,
+                        ),
+                      ),
               ),
-            ),
-            TextField(
-              controller: priceController,
-              decoration: const InputDecoration(
-                labelText: 'Harga Produk',
+              const SizedBox(height: 16),
+              TextField(
+                controller: nameController,
+                decoration: const InputDecoration(
+                  labelText: 'Nama Produk',
+                ),
               ),
-              keyboardType: TextInputType.number,
-            ),
-            // Tambahkan input lain jika diperlukan
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: () {
-                // Tambahkan produk baru ke controller
-                productController.addProduct(
-                  name: nameController.text,
-                  price: priceController.text,
-                  image:
-                      'assets/product/default.jpg', // Gunakan gambar default atau implementasi upload gambar
-                );
-                Get.back();
-              },
-              child: const Text('Simpan'),
-            ),
-          ],
+              TextField(
+                controller: priceController,
+                decoration: const InputDecoration(
+                  labelText: 'Harga Produk',
+                ),
+                keyboardType: TextInputType.number,
+              ),
+              // Tambahkan input lain jika diperlukan
+              const SizedBox(height: 20),
+              ElevatedButton(
+                onPressed: () {
+                  // Tambahkan produk baru ke controller
+                  productController.addProduct(
+                    name: nameController.text,
+                    price: priceController.text,
+                    imageFile: _image,
+                  );
+                  Get.back();
+                },
+                child: const Text('Simpan'),
+              ),
+            ],
+          ),
         ),
       ),
     );

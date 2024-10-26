@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'dart:io';
 
 class ProductCard extends StatelessWidget {
   final String image;
@@ -23,29 +24,42 @@ class ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Gambar default jika gambar tidak ditemukan
-    final String displayImage = image.isNotEmpty ? image : 'assets/product/default.jpg';
+    Widget imageWidget;
+
+    if (image.startsWith('assets/')) {
+      imageWidget = Image.asset(
+        image,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    } else {
+      imageWidget = Image.file(
+        File(image),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    }
 
     return GestureDetector(
       onTap: onTap,
       child: Card(
         child: Column(
           children: [
-            Expanded(
-              child: Image.asset(
-                displayImage,
-                fit: BoxFit.cover,
-                width: double.infinity,
-                errorBuilder: (context, error, stackTrace) {
-                  // Menampilkan gambar default jika terjadi error
-                  return Image.asset(
-                    'assets/product/default.jpg',
-                    fit: BoxFit.cover,
-                    width: double.infinity,
-                  );
-                },
-              ),
-            ),
+            Expanded(child: imageWidget),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(

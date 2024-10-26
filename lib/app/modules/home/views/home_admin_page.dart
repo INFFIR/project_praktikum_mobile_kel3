@@ -6,7 +6,7 @@ import '../../product/view/add_product_page.dart';
 import '../../product/view/add_promo_page.dart';
 import '../../product/view/edit_product_page.dart';
 import '../../product/widgets/admin_product_card.dart';
-import '../../components/bottom_navbar.dart';
+
 import '../../product/controllers/promo_controller.dart';
 
 

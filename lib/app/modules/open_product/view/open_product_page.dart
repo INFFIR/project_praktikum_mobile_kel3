@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../product/controllers/product_controller.dart';
+import 'dart:io';
 
 class OpenProductPage extends StatelessWidget {
   final int productIndex;
@@ -23,6 +24,36 @@ class OpenProductPage extends StatelessWidget {
     final String imagePath = productController.productImages[productIndex].isNotEmpty
         ? productController.productImages[productIndex]
         : 'assets/product/default.jpg';
+
+    Widget imageWidget;
+
+    if (imagePath.startsWith('assets/')) {
+      imageWidget = Image.asset(
+        imagePath,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    } else {
+      imageWidget = Image.file(
+        File(imagePath),
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -72,15 +103,8 @@ class OpenProductPage extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
-                  image: DecorationImage(
-                    image: AssetImage(imagePath),
-                    fit: BoxFit.cover,
-                    onError: (error, stackTrace) {
-                      // Menampilkan gambar default jika terjadi error
-                      AssetImage('assets/product/default.jpg');
-                    },
-                  ),
                 ),
+                child: imageWidget,
               ),
               const SizedBox(height: 30),
               // Nama Produk

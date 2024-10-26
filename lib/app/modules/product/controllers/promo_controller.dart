@@ -1,7 +1,12 @@
+// promo_controller.dart
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../widgets/promo_card.dart'; // Pastikan path ini sesuai dengan struktur folder Anda
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
+
+import '../widgets/promo_card.dart';
 
 class PromoController extends GetxController {
   final promoItems = <PromoItem>[].obs;
@@ -48,14 +53,62 @@ class PromoController extends GetxController {
       }
     });
   }
-    void addPromo(PromoItem promoItem) {
-    promoItems.add(promoItem);
-  }
 
   @override
   void onClose() {
     pageController.dispose();
     timer?.cancel();
     super.onClose();
+  }
+
+  Future<String> _saveImage(File imageFile) async {
+    final directory = await getApplicationDocumentsDirectory();
+    final fileName = basename(imageFile.path);
+    final savedImage = await imageFile.copy('${directory.path}/$fileName');
+    return savedImage.path;
+  }
+
+  void addPromo(PromoItem promoItem) async {
+    String imagePath = promoItem.image;
+
+    if (!imagePath.startsWith('assets/') && File(imagePath).existsSync()) {
+      // Jika gambar berasal dari file sistem, simpan ke direktori aplikasi
+      imagePath = await _saveImage(File(imagePath));
+    }
+
+    promoItems.add(
+      PromoItem(
+        image: imagePath,
+        titleText: promoItem.titleText.isNotEmpty ? promoItem.titleText : 'Judul Promo',
+        contentText: promoItem.contentText.isNotEmpty ? promoItem.contentText : 'Konten Promo',
+        promoLabelText: promoItem.promoLabelText.isNotEmpty ? promoItem.promoLabelText : 'Label Promo',
+        promoDescriptionText: promoItem.promoDescriptionText.isNotEmpty ? promoItem.promoDescriptionText : 'Deskripsi Promo',
+      ),
+    );
+  }
+
+  void editPromo(int index, PromoItem promoItem) async {
+    if (index >= 0 && index < promoItems.length) {
+      String imagePath = promoItem.image;
+
+      if (!imagePath.startsWith('assets/') && File(imagePath).existsSync()) {
+        // Jika gambar berasal dari file sistem, simpan ke direktori aplikasi
+        imagePath = await _saveImage(File(imagePath));
+      }
+
+      promoItems[index] = PromoItem(
+        image: imagePath,
+        titleText: promoItem.titleText.isNotEmpty ? promoItem.titleText : 'Judul Promo',
+        contentText: promoItem.contentText.isNotEmpty ? promoItem.contentText : 'Konten Promo',
+        promoLabelText: promoItem.promoLabelText.isNotEmpty ? promoItem.promoLabelText : 'Label Promo',
+        promoDescriptionText: promoItem.promoDescriptionText.isNotEmpty ? promoItem.promoDescriptionText : 'Deskripsi Promo',
+      );
+    }
+  }
+
+  void deletePromo(int index) {
+    if (index >= 0 && index < promoItems.length) {
+      promoItems.removeAt(index);
+    }
   }
 }
