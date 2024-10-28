@@ -102,3 +102,38 @@ macos/flutter/ephemeral/
 *.iws
 .vscode/
 
+# Flutter/Dart/Pub related
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+build/
+# iOS related
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Pods/
+ios/Runner/GeneratedPluginRegistrant.*
+ios/Runner.xcworkspace/
+# Android related
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/.gradle/
+**/android/build/
+**/android/local.properties
+# VS Code related
+.vscode/
+.idea/
+*.iml
+# macOS related
+.DS_Store
+# Logs
+*.log
+# Misc
+*.lock
+*.tmp
+# GetX specific
+# (Biasanya tidak ada file khusus untuk GetX yang perlu di-ignore,
+# tetapi jika Anda memiliki konfigurasi atau file tertentu terkait GetX, tambahkan di sini)
