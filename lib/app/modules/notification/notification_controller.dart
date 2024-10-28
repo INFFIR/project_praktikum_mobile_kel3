@@ -45,8 +45,8 @@ class NotificationController extends GetxController {
     if (notification != null) {
       const AndroidNotificationDetails androidPlatformChannelSpecifics =
           AndroidNotificationDetails(
-        'your_channel_id',
-        'your_channel_name',
+        'product_updates_channel',
+        'Product Updates',
         importance: Importance.max,
         priority: Priority.high,
       );
