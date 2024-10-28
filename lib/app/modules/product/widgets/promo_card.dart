@@ -1,24 +1,27 @@
-// promo_section.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../controllers/promo_controller.dart';
-import 'dart:io';
 
+// promo_item.dart
 class PromoItem {
-  final String image;
+  final String? id; // id dibuat nullable
+  final String imageUrl;
   final String titleText;
   final String contentText;
   final String promoLabelText;
   final String promoDescriptionText;
 
   PromoItem({
-    required this.image,
+    this.id, // id menjadi opsional
+    required this.imageUrl,
     required this.titleText,
     required this.contentText,
     required this.promoLabelText,
     required this.promoDescriptionText,
   });
 }
+
+
 
 class PromoSection extends StatelessWidget {
   const PromoSection({super.key});
@@ -39,28 +42,17 @@ class PromoSection extends StatelessWidget {
               itemBuilder: (context, index) {
                 final promoItem = promoController.promoItems[index];
 
-                // Menangani data yang hilang
-                final String imagePath = promoItem.image.isNotEmpty
-                    ? promoItem.image
-                    : 'assets/promo/default.jpg';
-                final String titleText = promoItem.titleText.isNotEmpty
-                    ? promoItem.titleText
-                    : 'Promo Title';
-                final String contentText = promoItem.contentText.isNotEmpty
-                    ? promoItem.contentText
-                    : 'Promo Content';
-                final String promoLabelText = promoItem.promoLabelText.isNotEmpty
-                    ? promoItem.promoLabelText
-                    : 'Promo Label';
-                final String promoDescriptionText = promoItem.promoDescriptionText.isNotEmpty
-                    ? promoItem.promoDescriptionText
-                    : 'Promo Description';
+                final String imageUrl = promoItem.imageUrl;
+                final String titleText = promoItem.titleText;
+                final String contentText = promoItem.contentText;
+                final String promoLabelText = promoItem.promoLabelText;
+                final String promoDescriptionText = promoItem.promoDescriptionText;
 
                 Widget imageWidget;
 
-                if (imagePath.startsWith('assets/')) {
-                  imageWidget = Image.asset(
-                    imagePath,
+                if (imageUrl.isNotEmpty) {
+                  imageWidget = Image.network(
+                    imageUrl,
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
@@ -74,19 +66,11 @@ class PromoSection extends StatelessWidget {
                     },
                   );
                 } else {
-                  imageWidget = Image.file(
-                    File(imagePath),
+                  imageWidget = Image.asset(
+                    'assets/promo/default.jpg',
                     fit: BoxFit.cover,
                     width: double.infinity,
                     height: double.infinity,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Image.asset(
-                        'assets/promo/default.jpg',
-                        fit: BoxFit.cover,
-                        width: double.infinity,
-                        height: double.infinity,
-                      );
-                    },
                   );
                 }
 
@@ -108,13 +92,12 @@ class PromoSection extends StatelessWidget {
                       ),
                       child: imageWidget,
                     ),
-                    // Bagian promoLabelText
                     Positioned(
                       top: 16,
                       left: 16,
                       child: Container(
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 12, vertical: 4),
+                        padding:
+                            const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                         color: Colors.red,
                         child: Text(
                           promoLabelText,
@@ -123,13 +106,11 @@ class PromoSection extends StatelessWidget {
                         ),
                       ),
                     ),
-                    // Bagian promoDescriptionText dengan stroke hitam
                     Positioned(
                       bottom: 16,
                       left: 16,
                       child: Stack(
                         children: [
-                          // Teks dengan stroke hitam
                           Text(
                             promoDescriptionText,
                             style: TextStyle(
@@ -141,7 +122,6 @@ class PromoSection extends StatelessWidget {
                                 ..color = Colors.black,
                             ),
                           ),
-                          // Teks isi berwarna putih
                           Text(
                             promoDescriptionText,
                             style: const TextStyle(

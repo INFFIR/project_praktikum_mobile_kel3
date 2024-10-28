@@ -6,8 +6,8 @@ import '../../product/controllers/product_controller.dart';
 import 'dart:io';
 
 class EditProductPage extends StatefulWidget {
-  final int productIndex;
-  const EditProductPage({super.key, required this.productIndex});
+  final String productId;
+  const EditProductPage({super.key, required this.productId});
 
   @override
   _EditProductPageState createState() => _EditProductPageState();
@@ -16,34 +16,75 @@ class EditProductPage extends StatefulWidget {
 class _EditProductPageState extends State<EditProductPage> {
   final ProductController productController = Get.find();
 
-  late final TextEditingController nameController;
-  late final TextEditingController priceController;
+  final TextEditingController nameController = TextEditingController();
+  final TextEditingController priceController = TextEditingController();
   File? _image;
+  String? imageUrl;
 
   @override
   void initState() {
     super.initState();
-    final product = productController.products[widget.productIndex];
+    fetchProductData();
+  }
 
-    nameController = TextEditingController(text: product['name']);
-    priceController = TextEditingController(text: product['price']);
-    // Inisialisasi gambar
-    _image = null;
+  void fetchProductData() async {
+    var doc = await productController.firestore
+        .collection('products')
+        .doc(widget.productId)
+        .get();
+    var data = doc.data();
+    if (data != null) {
+      nameController.text = data['name'] ?? '';
+      priceController.text = data['price'] ?? '';
+      setState(() {
+        imageUrl = data['imageUrl'];
+      });
+    }
   }
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      _image = pickedFile != null ? File(pickedFile.path) : null;
-    });
+      setState(() {
+        _image = pickedFile != null ? File(pickedFile.path) : null;
+      });
+    } catch (e) {
+      print("Error picking image: $e");
+    }
   }
 
   @override
   Widget build(BuildContext context) {
-    final product = productController.products[widget.productIndex];
-    final String currentImage = productController.productImages[widget.productIndex];
+    Widget imageWidget;
+
+    if (_image != null) {
+      imageWidget = Image.file(
+        _image!,
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+      imageWidget = Image.network(
+        imageUrl!,
+        height: 200,
+        width: double.infinity,
+        fit: BoxFit.cover,
+      );
+    } else {
+      imageWidget = Container(
+        height: 200,
+        width: double.infinity,
+        color: Colors.grey[300],
+        child: const Icon(
+          Icons.add_a_photo,
+          color: Colors.white,
+          size: 50,
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -54,34 +95,9 @@ class _EditProductPageState extends State<EditProductPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
-              // Tampilan Gambar
               GestureDetector(
                 onTap: _pickImage,
-                child: _image != null
-                    ? Image.file(
-                        _image!,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                      )
-                    : Image.asset(
-                        currentImage,
-                        height: 200,
-                        width: double.infinity,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) {
-                          return Container(
-                            height: 200,
-                            width: double.infinity,
-                            color: Colors.grey[300],
-                            child: const Icon(
-                              Icons.add_a_photo,
-                              color: Colors.white,
-                              size: 50,
-                            ),
-                          );
-                        },
-                      ),
+                child: imageWidget,
               ),
               const SizedBox(height: 16),
               TextField(
@@ -97,13 +113,11 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 keyboardType: TextInputType.number,
               ),
-              // Tambahkan input lain jika diperlukan
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Update produk di controller
-                  productController.editProduct(
-                    widget.productIndex,
+                onPressed: () async {
+                  await productController.editProduct(
+                    widget.productId,
                     name: nameController.text,
                     price: priceController.text,
                     imageFile: _image,

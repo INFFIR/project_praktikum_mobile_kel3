@@ -1,140 +1,120 @@
-// product_controller.dart
 import 'package:get/get.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
-import 'package:path_provider/path_provider.dart';
-import 'package:path/path.dart';
 
 class ProductController extends GetxController {
-  final productImages = <String>[].obs;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseStorage storage = FirebaseStorage.instance;
+
   final products = <Map<String, dynamic>>[].obs;
   final isFavorited = <RxBool>[].obs;
 
   @override
   void onInit() {
     super.onInit();
-
-    productImages.assignAll([
-      'assets/product/product0.jpg',
-      'assets/product/product1.jpg',
-      'assets/product/product2.jpg',
-      '',
-      'assets/product/product4.jpg',
-      'assets/product/product5.jpg',
-      'assets/product/nonexistent.jpg',
-    ]);
-
-    products.assignAll([
-      {
-        'name': 'Splash some color (pink)',
-        'price': '330K',
-        'likes': 100.obs,
-      },
-      {
-        'name': '',
-        'price': '330K',
-        'likes': 200.obs,
-      },
-      {
-        'name': 'Splash some color (yellow)',
-        'price': null,
-        'likes': 150.obs,
-      },
-      {
-        'name': 'Splash all color',
-        'price': '900K',
-        'likes': null,
-      },
-      {
-        'name': 'Splash some color (pink)',
-        'price': '330K',
-        'likes': 100.obs,
-      },
-      {
-        'name': 'Splash some color (white)',
-        'price': '330K',
-        'likes': 200.obs,
-      },
-      {
-        'name': null,
-        'price': '330K',
-        'likes': 100.obs,
-      },
-    ]);
-
-    isFavorited.assignAll(
-      List<RxBool>.generate(products.length, (_) => false.obs),
-    );
-
-    // Menangani nilai null atau hilang
-    for (var i = 0; i < products.length; i++) {
-      products[i]['name'] ??= 'Nama Produk Tidak Tersedia';
-      products[i]['price'] ??= 'Harga Tidak Tersedia';
-      products[i]['likes'] ??= 0.obs;
-      productImages[i] = productImages[i].isNotEmpty
-          ? productImages[i]
-          : 'assets/product/default.jpg'; // Gambar default
-    }
+    fetchProducts();
   }
 
-  void toggleFavorite(int index) {
-    if (index >= 0 && index < isFavorited.length) {
-      isFavorited[index].value = !isFavorited[index].value;
-      if (isFavorited[index].value) {
-        products[index]['likes']++;
-      } else {
-        products[index]['likes']--;
-      }
-    }
-  }
+  void fetchProducts() {
+    firestore.collection('products').snapshots().listen((snapshot) {
+      products.value = snapshot.docs.map((doc) {
+        var data = doc.data();
+        data['id'] = doc.id;
+        return data;
+      }).toList();
 
-  Future<String> _saveImage(File imageFile) async {
-    final directory = await getApplicationDocumentsDirectory();
-    final fileName = basename(imageFile.path);
-    final savedImage = await imageFile.copy('${directory.path}/$fileName');
-    return savedImage.path;
-  }
-
-  void addProduct({
-    required String name,
-    required String price,
-    required File? imageFile,
-  }) async {
-    String imagePath = 'assets/product/default.jpg';
-    if (imageFile != null) {
-      imagePath = await _saveImage(imageFile);
-    }
-
-    products.add({
-      'name': name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
-      'price': price.isNotEmpty ? price : 'Harga Tidak Tersedia',
-      'likes': 0.obs,
+      isFavorited.assignAll(
+        List<RxBool>.generate(products.length, (_) => false.obs),
+      );
     });
-    productImages.add(imagePath);
-    isFavorited.add(false.obs);
   }
 
-  void deleteProduct(int index) {
-    if (index >= 0 && index < products.length) {
-      products.removeAt(index);
-      productImages.removeAt(index);
-      isFavorited.removeAt(index);
-    }
-  }
-
-  void editProduct(
-    int index, {
+  Future<void> addProduct({
     required String name,
     required String price,
     required File? imageFile,
   }) async {
-    if (index >= 0 && index < products.length) {
-      products[index]['name'] = name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia';
-      products[index]['price'] = price.isNotEmpty ? price : 'Harga Tidak Tersedia';
-
-      if (imageFile != null) {
-        String imagePath = await _saveImage(imageFile);
-        productImages[index] = imagePath;
-      }
+    int? parsedPrice = int.tryParse(price);
+    if (parsedPrice == null) {
+      Get.snackbar("Error", "Price must be an integer value.");
+      return;
     }
+
+    String imageUrl = '';
+    if (imageFile != null) {
+      imageUrl = await _uploadImageToStorage(imageFile, 'product_images');
+    }
+
+    await firestore.collection('products').add({
+      'name': name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
+      'price': parsedPrice,
+      'imageUrl': imageUrl,
+      'likes': 0,
+    });
+  }
+
+  Future<void> deleteProduct(String productId) async {
+    await firestore.collection('products').doc(productId).delete();
+  }
+
+  Future<void> editProduct(
+    String productId, {
+    required String name,
+    required String price,
+    required File? imageFile,
+  }) async {
+    int? parsedPrice = int.tryParse(price);
+    if (parsedPrice == null) {
+      Get.snackbar("Error", "Price must be an integer value.");
+      return;
+    }
+
+    Map<String, dynamic> updatedData = {
+      'name': name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
+      'price': parsedPrice,
+    };
+
+    if (imageFile != null) {
+      String imageUrl = await _uploadImageToStorage(imageFile, 'product_images');
+      updatedData['imageUrl'] = imageUrl;
+    }
+
+    await firestore.collection('products').doc(productId).update(updatedData);
+  }
+
+  Future<String> _uploadImageToStorage(File imageFile, String folder) async {
+    Reference storageReference = storage
+        .ref()
+        .child('$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
+    UploadTask uploadTask = storageReference.putFile(imageFile);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    String imageUrl = await taskSnapshot.ref.getDownloadURL();
+    return imageUrl;
+  }
+
+  void toggleFavorite(int index, String userId) async {
+    final productId = products[index]['id'];
+    final favRef = firestore
+        .collection('products')
+        .doc(productId)
+        .collection('favorites')
+        .doc(userId);
+
+    final favDoc = await favRef.get();
+
+    if (favDoc.exists) {
+      await favRef.delete();
+      products[index]['likes'] = (products[index]['likes'] ?? 1) - 1;
+      isFavorited[index].value = false;
+    } else {
+      await favRef.set({'userId': userId});
+      products[index]['likes'] = (products[index]['likes'] ?? 0) + 1;
+      isFavorited[index].value = true;
+    }
+
+    firestore.collection('products').doc(productId).update({
+      'likes': products[index]['likes'],
+    });
   }
 }

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../components/bottom_navbar.dart';
 import '../../open_product/view/open_product_page.dart';
 import '../../product/controllers/product_controller.dart';
 import '../../product/controllers/promo_controller.dart';
 import '../../product/widgets/product_card.dart';
-import '../../components/bottom_navbar.dart';
 import '../../product/widgets/promo_card.dart';
 import 'home_admin_page.dart';
 
@@ -16,8 +16,8 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  final PromoController promoController = Get.find();
-  final ProductController productController = Get.find();
+  final PromoController promoController = Get.put(PromoController());
+  final ProductController productController = Get.put(ProductController());
   int _currentIndex = 0;
 
   void onTabTapped(int index) {
@@ -49,7 +49,6 @@ class _HomePageState extends State<HomePage> {
         body: SingleChildScrollView(
           child: Column(
             children: [
-              // Bagian Hello There
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
@@ -76,11 +75,8 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
+              const PromoSection(), 
 
-              // Bagian Promo
-              const PromoSection(),
-
-              // Bagian Popular Choices
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Align(
@@ -98,8 +94,6 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               ),
-
-              // GridView produk
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Obx(
@@ -115,26 +109,27 @@ class _HomePageState extends State<HomePage> {
                       mainAxisSpacing: 8.0,
                     ),
                     itemCount: productController.products.length,
-                    itemBuilder: (context, index) => ProductCard(
-                      image: productController.productImages[index],
-                      name: productController.products[index]['name'] ??
-                          'Nama Produk Tidak Tersedia',
-                      price:
-                          'Rp ${productController.products[index]['price'] ?? 'Harga Tidak Tersedia'}',
-                      likes:
-                          productController.products[index]['likes'] ?? 0.obs,
-                      isFavorited: productController.isFavorited[index],
-                      onFavoriteToggle: () {
-                        productController.toggleFavorite(index);
-                      },
-                      onTap: () {
-                        Get.to(
-                          () => OpenProductPage(
-                            productIndex: index,
-                          ),
-                        );
-                      },
-                    ),
+                    itemBuilder: (context, index) {
+                      var product = productController.products[index];
+                      return ProductCard(
+                        imageUrl: product['imageUrl'] ?? '',
+                        name: product['name'] ?? 'Nama Produk Tidak Tersedia',
+                        price: 'Rp ${product['price'] ?? 'Harga Tidak Tersedia'}',
+                        likes: RxInt(product['likes'] ?? 0),
+                        isFavorited: productController.isFavorited[index],
+                        onFavoriteToggle: () {
+                          final userId = 'current_user_id';
+                          productController.toggleFavorite(index, userId);
+                        },
+                        onTap: () {
+                          Get.to(
+                            () => OpenProductPage(
+                              productIndex: index,
+                            ),
+                          );
+                        },
+                      );
+                    },
                   ),
                 ),
               ),

@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'dart:io';
 
 class ProductCard extends StatelessWidget {
-  final String image;
+  final String imageUrl;
   final String name;
   final String price;
   final RxInt likes;
@@ -13,7 +12,7 @@ class ProductCard extends StatelessWidget {
 
   const ProductCard({
     super.key,
-    required this.image,
+    required this.imageUrl,
     required this.name,
     required this.price,
     required this.likes,
@@ -26,9 +25,9 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget imageWidget;
 
-    if (image.startsWith('assets/')) {
-      imageWidget = Image.asset(
-        image,
+    if (imageUrl.isNotEmpty) {
+      imageWidget = Image.network(
+        imageUrl,
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder: (context, error, stackTrace) {
@@ -40,17 +39,10 @@ class ProductCard extends StatelessWidget {
         },
       );
     } else {
-      imageWidget = Image.file(
-        File(image),
+      imageWidget = Image.asset(
+        'assets/product/default.jpg',
         fit: BoxFit.cover,
         width: double.infinity,
-        errorBuilder: (context, error, stackTrace) {
-          return Image.asset(
-            'assets/product/default.jpg',
-            fit: BoxFit.cover,
-            width: double.infinity,
-          );
-        },
       );
     }
 

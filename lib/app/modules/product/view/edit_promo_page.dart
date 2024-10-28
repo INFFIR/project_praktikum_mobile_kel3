@@ -8,8 +8,9 @@ import 'dart:io';
 import '../widgets/promo_card.dart';
 
 class EditPromoPage extends StatefulWidget {
-  final int promoIndex;
-  const EditPromoPage({super.key, required this.promoIndex});
+  final String promoId;
+
+  const EditPromoPage({super.key, required this.promoId});
 
   @override
   _EditPromoPageState createState() => _EditPromoPageState();
@@ -18,22 +19,31 @@ class EditPromoPage extends StatefulWidget {
 class _EditPromoPageState extends State<EditPromoPage> {
   final PromoController promoController = Get.find();
 
-  late final TextEditingController titleController;
-  late final TextEditingController contentController;
-  late final TextEditingController labelController;
-  late final TextEditingController descriptionController;
+  final TextEditingController titleController = TextEditingController();
+  final TextEditingController contentController = TextEditingController();
+  final TextEditingController labelController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
   File? _image;
+  String? imageUrl;
 
   @override
   void initState() {
     super.initState();
-    final promo = promoController.promoItems[widget.promoIndex];
+    fetchPromoData();
+  }
 
-    titleController = TextEditingController(text: promo.titleText);
-    contentController = TextEditingController(text: promo.contentText);
-    labelController = TextEditingController(text: promo.promoLabelText);
-    descriptionController = TextEditingController(text: promo.promoDescriptionText);
-    _image = null;
+  void fetchPromoData() async {
+    var doc = await promoController.firestore.collection('promos').doc(widget.promoId).get();
+    var data = doc.data();
+    if (data != null) {
+      titleController.text = data['titleText'] ?? '';
+      contentController.text = data['contentText'] ?? '';
+      labelController.text = data['promoLabelText'] ?? '';
+      descriptionController.text = data['promoDescriptionText'] ?? '';
+      setState(() {
+        imageUrl = data['imageUrl'];
+      });
+    }
   }
 
   Future<void> _pickImage() async {
@@ -52,9 +62,6 @@ class _EditPromoPageState extends State<EditPromoPage> {
 
   @override
   Widget build(BuildContext context) {
-    final promo = promoController.promoItems[widget.promoIndex];
-    final String currentImage = promo.image;
-
     Widget imageWidget;
 
     if (_image != null) {
@@ -64,19 +71,23 @@ class _EditPromoPageState extends State<EditPromoPage> {
         width: double.infinity,
         fit: BoxFit.cover,
       );
-    } else if (currentImage.startsWith('assets/')) {
-      imageWidget = Image.asset(
-        currentImage,
+    } else if (imageUrl != null && imageUrl!.isNotEmpty) {
+      imageWidget = Image.network(
+        imageUrl!,
         height: 200,
         width: double.infinity,
         fit: BoxFit.cover,
       );
     } else {
-      imageWidget = Image.file(
-        File(currentImage),
+      imageWidget = Container(
         height: 200,
         width: double.infinity,
-        fit: BoxFit.cover,
+        color: Colors.grey[300],
+        child: const Icon(
+          Icons.add_a_photo,
+          color: Colors.white,
+          size: 50,
+        ),
       );
     }
 
@@ -121,19 +132,18 @@ class _EditPromoPageState extends State<EditPromoPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // Update promo di controller
-                  promoController.editPromo(
-                    widget.promoIndex,
+                  await promoController.editPromo(
+                    widget.promoId,
                     PromoItem(
-                      image: _image != null
-                          ? _image!.path
-                          : promo.image,
+                      imageUrl: '', // Akan diisi setelah upload gambar
                       titleText: titleController.text,
                       contentText: contentController.text,
                       promoLabelText: labelController.text,
                       promoDescriptionText: descriptionController.text,
                     ),
+                    _image, // Kirim file gambar
                   );
                   Get.back();
                 },

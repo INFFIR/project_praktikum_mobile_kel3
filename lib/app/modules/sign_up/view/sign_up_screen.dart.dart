@@ -8,9 +8,9 @@ class SignUpScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Sign Up")),
+      appBar: AppBar(title: const Text("Sign Up")),
       body: Padding(
-        padding: EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(16.0),
         child: Column(
           children: [
             GestureDetector(
@@ -20,34 +20,34 @@ class SignUpScreen extends StatelessWidget {
                   radius: 50,
                   backgroundImage: authController.profileImage.value != null
                       ? FileImage(authController.profileImage.value!)
-                      : AssetImage("assets/placeholder.png") as ImageProvider,
-                  child: Icon(Icons.camera_alt),
+                      : const AssetImage("assets/placeholder.png") as ImageProvider,
+                  child: const Icon(Icons.camera_alt),
                 );
               }),
             ),
             TextField(
               controller: authController.usernameController,
-              decoration: InputDecoration(labelText: 'Username'),
+              decoration: const InputDecoration(labelText: 'Username'),
             ),
             TextField(
               controller: authController.emailController,
-              decoration: InputDecoration(labelText: 'Email'),
+              decoration: const InputDecoration(labelText: 'Email'),
             ),
             TextField(
               controller: authController.addressController,
-              decoration: InputDecoration(labelText: 'Address'),
+              decoration: const InputDecoration(labelText: 'Address'),
             ),
             TextField(
               controller: authController.passwordController,
-              decoration: InputDecoration(labelText: 'Password'),
+              decoration: const InputDecoration(labelText: 'Password'),
               obscureText: true,
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () {
                 authController.register();
               },
-              child: Text('Sign Up'),
+              child: const Text('Sign Up'),
             ),
           ],
         ),

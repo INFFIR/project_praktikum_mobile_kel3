@@ -1,4 +1,3 @@
-// add_product_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
@@ -21,11 +20,15 @@ class _AddProductPageState extends State<AddProductPage> {
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    try {
+      final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    setState(() {
-      _image = pickedFile != null ? File(pickedFile.path) : null;
-    });
+      setState(() {
+        _image = pickedFile != null ? File(pickedFile.path) : null;
+      });
+    } catch (e) {
+      print("Error picking image: $e");
+    }
   }
 
   @override
@@ -74,12 +77,10 @@ class _AddProductPageState extends State<AddProductPage> {
                 ),
                 keyboardType: TextInputType.number,
               ),
-              // Tambahkan input lain jika diperlukan
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  // Tambahkan produk baru ke controller
-                  productController.addProduct(
+                onPressed: () async {
+                  await productController.addProduct(
                     name: nameController.text,
                     price: priceController.text,
                     imageFile: _image,

@@ -96,18 +96,17 @@ class _AddPromoPageState extends State<AddPromoPage> {
               ),
               const SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
+                onPressed: () async {
                   // Tambahkan promo baru ke controller
-                  promoController.addPromo(
+                  await promoController.addPromo(
                     PromoItem(
-                      image: _image != null
-                          ? _image!.path
-                          : 'assets/promo/default.jpg',
+                      imageUrl: '', // Akan diisi setelah upload gambar
                       titleText: titleController.text,
                       contentText: contentController.text,
                       promoLabelText: labelController.text,
                       promoDescriptionText: descriptionController.text,
                     ),
+                    _image, // Kirim file gambar
                   );
                   Get.back();
                 },

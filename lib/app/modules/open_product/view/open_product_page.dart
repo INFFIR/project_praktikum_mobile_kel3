@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../product/controllers/product_controller.dart';
-import 'dart:io';
 
 class OpenProductPage extends StatelessWidget {
   final int productIndex;
@@ -14,22 +13,22 @@ class OpenProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Mengambil data produk berdasarkan indeks
     final product = productController.products[productIndex];
     final isFavorited = productController.isFavorited[productIndex];
-    final likes = product['likes'] ?? 0.obs;
+    final likes = RxInt(product['likes'] ?? 0);
 
-    // Menangani data yang hilang
+    // Mengatur data produk dengan validasi untuk nama, harga, dan URL gambar
     final String name = product['name'] ?? 'Nama Produk Tidak Tersedia';
-    final String price = product['price'] ?? 'Harga Tidak Tersedia';
-    final String imagePath = productController.productImages[productIndex].isNotEmpty
-        ? productController.productImages[productIndex]
-        : 'assets/product/default.jpg';
+    final int price = product['price'] ?? 0; // Tampilkan sebagai int
+    final String imageUrl = product['imageUrl'] ?? 'assets/product/default.jpg';
 
+    // Menampilkan gambar berdasarkan apakah imageUrl adalah URL atau rute lokal
     Widget imageWidget;
 
-    if (imagePath.startsWith('assets/')) {
-      imageWidget = Image.asset(
-        imagePath,
+    if (imageUrl.startsWith('http')) {
+      imageWidget = Image.network(
+        imageUrl,
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder: (context, error, stackTrace) {
@@ -41,8 +40,8 @@ class OpenProductPage extends StatelessWidget {
         },
       );
     } else {
-      imageWidget = Image.file(
-        File(imagePath),
+      imageWidget = Image.asset(
+        imageUrl,
         fit: BoxFit.cover,
         width: double.infinity,
         errorBuilder: (context, error, stackTrace) {
@@ -85,14 +84,15 @@ class OpenProductPage extends StatelessWidget {
                 color: isFavorited.value ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                productController.toggleFavorite(productIndex);
+                final userId = 'current_user_id'; // ID pengguna
+                productController.toggleFavorite(productIndex, userId);
               },
             ),
           ),
         ],
       ),
       body: Center(
-        child: SingleChildScrollView( // Menggunakan SingleChildScrollView jika konten melebihi layar
+        child: SingleChildScrollView(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -119,7 +119,7 @@ class OpenProductPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              // Harga Produk
+              // Harga Produk sebagai int
               Text(
                 'Rp $price,-',
                 style: const TextStyle(
@@ -150,7 +150,7 @@ class OpenProductPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Spesifikasi
+              // Spesifikasi Produk
               const Text(
                 'Specifications',
                 style: TextStyle(
@@ -178,7 +178,6 @@ class OpenProductPage extends StatelessWidget {
               // Tombol Buy Now
               ElevatedButton(
                 onPressed: () {
-                  // Tindakan saat tombol ditekan
                   Get.toNamed("/detail_product");
                 },
                 style: ElevatedButton.styleFrom(

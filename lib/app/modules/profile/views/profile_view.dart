@@ -77,9 +77,9 @@ class ProfileView extends GetView<ProfileController> {
                                 ),
                                 Text(
                                   controller.emailController.text,
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     fontSize: 14,
-                                    color: const Color.fromARGB(
+                                    color: Color.fromARGB(
                                         255, 232, 232, 232),
                                   ),
                                 ),
