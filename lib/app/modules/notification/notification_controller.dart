@@ -1,33 +1,64 @@
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
 class NotificationController extends GetxController {
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
+  final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
 
   @override
   void onInit() {
     super.onInit();
+    _initializeLocalNotifications();
     _setupFCM();
   }
 
+  void _initializeLocalNotifications() {
+    const AndroidInitializationSettings initializationSettingsAndroid =
+        AndroidInitializationSettings('@mipmap/ic_launcher');
+    final InitializationSettings initializationSettings =
+        InitializationSettings(android: initializationSettingsAndroid);
+
+    _localNotificationsPlugin.initialize(initializationSettings);
+  }
+
   Future<void> _setupFCM() async {
-    // Dapatkan izin untuk menerima notifikasi di iOS
     await _messaging.requestPermission();
 
-    // Handler untuk pesan masuk saat aplikasi dalam kondisi Foreground
     FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      _handleMessage(message);
+      _showLocalNotification(message);
     });
 
-    // Handler untuk pesan yang diterima saat aplikasi di Background dan user mengetap notifikasi
     FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       _handleMessage(message);
     });
 
-    // Handler untuk pesan saat aplikasi di Terminated dan user mengetap notifikasi
     RemoteMessage? initialMessage = await _messaging.getInitialMessage();
     if (initialMessage != null) {
       _handleMessage(initialMessage);
+    }
+  }
+
+  void _showLocalNotification(RemoteMessage message) {
+    final notification = message.notification;
+    if (notification != null) {
+      const AndroidNotificationDetails androidPlatformChannelSpecifics =
+          AndroidNotificationDetails(
+        'your_channel_id',
+        'your_channel_name',
+        importance: Importance.max,
+        priority: Priority.high,
+      );
+      const NotificationDetails platformChannelSpecifics =
+          NotificationDetails(android: androidPlatformChannelSpecifics);
+
+      _localNotificationsPlugin.show(
+        notification.hashCode,
+        notification.title,
+        notification.body,
+        platformChannelSpecifics,
+      );
     }
   }
 
