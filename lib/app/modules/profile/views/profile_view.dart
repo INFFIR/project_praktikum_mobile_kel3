@@ -9,11 +9,12 @@ class ProfileView extends GetView<ProfileController> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white, // Set the main background color to white
+      backgroundColor: const Color.fromARGB(
+          255, 255, 255, 255), // Set the main background color to white
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.arrow_back,
-              color: Color.fromARGB(0, 37, 38, 40)),
+              color: Color.fromARGB(255, 32, 32, 32)),
           onPressed: () => Get.back(),
         ),
         backgroundColor: Colors.white,
@@ -72,7 +73,7 @@ class ProfileView extends GetView<ProfileController> {
                                   style: const TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Colors.orange,
+                                    color: Color.fromARGB(255, 255, 255, 255),
                                   ),
                                 ),
                                 Text(
