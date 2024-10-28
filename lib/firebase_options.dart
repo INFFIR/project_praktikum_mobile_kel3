@@ -64,6 +64,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '56727432724',
     projectId: 'praktikum-mobile-kel3-b1e1c',
     storageBucket: 'praktikum-mobile-kel3-b1e1c.appspot.com',
+    androidClientId: '56727432724-d20vef1klmbf7pah3gcdijdc9v5chsbc.apps.googleusercontent.com',
+    iosClientId: '56727432724-ctepc2i7sbvtgadv3jsdoktgg20j4anu.apps.googleusercontent.com',
     iosBundleId: 'com.example.projectPraktikumMobileKel3',
   );
 
@@ -73,6 +75,8 @@ class DefaultFirebaseOptions {
     messagingSenderId: '56727432724',
     projectId: 'praktikum-mobile-kel3-b1e1c',
     storageBucket: 'praktikum-mobile-kel3-b1e1c.appspot.com',
+    androidClientId: '56727432724-d20vef1klmbf7pah3gcdijdc9v5chsbc.apps.googleusercontent.com',
+    iosClientId: '56727432724-ctepc2i7sbvtgadv3jsdoktgg20j4anu.apps.googleusercontent.com',
     iosBundleId: 'com.example.projectPraktikumMobileKel3',
   );
 
@@ -85,4 +89,5 @@ class DefaultFirebaseOptions {
     storageBucket: 'praktikum-mobile-kel3-b1e1c.appspot.com',
     measurementId: 'G-2L17QYET30',
   );
+
 }
