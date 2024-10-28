@@ -27,20 +27,21 @@ class _EditProductPageState extends State<EditProductPage> {
     fetchProductData();
   }
 
-  void fetchProductData() async {
-    var doc = await productController.firestore
-        .collection('products')
-        .doc(widget.productId)
-        .get();
-    var data = doc.data();
-    if (data != null) {
-      nameController.text = data['name'] ?? '';
-      priceController.text = data['price'] ?? '';
-      setState(() {
-        imageUrl = data['imageUrl'];
-      });
-    }
+void fetchProductData() async {
+  var doc = await productController.firestore
+      .collection('products')
+      .doc(widget.productId)
+      .get();
+  var data = doc.data();
+  if (data != null) {
+    nameController.text = data['name'] ?? '';
+    priceController.text = data['price'] != null ? data['price'].toString() : '';
+    setState(() {
+      imageUrl = data['imageUrl'];
+    });
   }
+}
+
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();

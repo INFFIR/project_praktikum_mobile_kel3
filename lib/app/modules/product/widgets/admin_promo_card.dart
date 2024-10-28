@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
+
 
 class AdminPromoCard extends StatelessWidget {
   final String image; // URL gambar promo

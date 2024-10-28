@@ -144,9 +144,9 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                     itemBuilder: (context, index) {
                       var promo = promoController.promoItems[index];
                       return AdminPromoCard(
-                        image: promo.imageUrl ?? '',
-                        title: promo.titleText ?? 'Promo Title',
-                        description: promo.promoDescriptionText ?? 'Promo Description',
+                        image: promo.imageUrl,
+                        title: promo.titleText,
+                        description: promo.promoDescriptionText,
                         onEdit: () {
                           // Navigate to Edit Promo Page
                           Get.to(() => EditPromoPage(promoId: promo.id ?? ''));
