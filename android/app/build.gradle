@@ -46,6 +46,7 @@ android {
     dependencies {
         implementation platform('com.google.firebase:firebase-bom:32.2.0') // Sesuaikan dengan versi terbaru
         implementation 'com.google.firebase:firebase-auth'
+        implementation 'com.google.firebase:firebase-messaging'
     }
     // Dependencies lainnya
 
