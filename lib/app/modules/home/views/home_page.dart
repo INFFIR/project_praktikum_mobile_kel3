@@ -7,7 +7,7 @@ import '../../product/controllers/promo_controller.dart';
 import '../../product/widgets/product_card.dart';
 import '../../product/widgets/promo_card.dart';
 import 'home_admin_page.dart';
-
+import '../../services/notification_list_page.dart';
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -39,10 +39,13 @@ class _HomePageState extends State<HomePage> {
                   Get.to(() => const HomeAdminPage());
                 },
               ),
-              IconButton(
-                icon: const Icon(Icons.person),
-                onPressed: () => Get.toNamed('/profile'),
-              ),
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                // Navigasi ke halaman daftar notifikasi
+                Get.to(() => const NotificationListPage());
+              },
+            ),
             ],
           ),
         ),

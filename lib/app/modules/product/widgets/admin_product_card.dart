@@ -9,19 +9,20 @@ class AdminProductCard extends StatelessWidget {
   final VoidCallback onDelete;
 
   const AdminProductCard({
-    super.key,
+    Key? key,
     required this.image,
     required this.name,
     required this.price,
     required this.onEdit,
     required this.onDelete,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     Widget imageWidget;
 
     if (image.startsWith('assets/')) {
+      // Memuat gambar dari assets
       imageWidget = Image.asset(
         image,
         fit: BoxFit.cover,
@@ -34,7 +35,22 @@ class AdminProductCard extends StatelessWidget {
           );
         },
       );
+    } else if (image.startsWith('http')) {
+      // Memuat gambar dari URL jaringan
+      imageWidget = Image.network(
+        image,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
     } else {
+      // Memuat gambar dari file lokal
       imageWidget = Image.file(
         File(image),
         fit: BoxFit.cover,
