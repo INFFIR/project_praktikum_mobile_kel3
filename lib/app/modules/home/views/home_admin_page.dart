@@ -62,7 +62,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                     padding: const EdgeInsets.only(bottom: 16.0),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.75,
                       crossAxisSpacing: 8.0,
@@ -77,7 +78,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                         price: 'Rp ${product['price'] ?? 0}',
                         onEdit: () {
                           // Navigate to Edit Product Page
-                          Get.to(() => EditProductPage(productId: product['id']));
+                          Get.to(
+                              () => EditProductPage(productId: product['id']));
                         },
                         onDelete: () {
                           // Confirm Deletion
@@ -94,7 +96,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                                 ),
                                 TextButton(
                                   onPressed: () {
-                                    productController.deleteProduct(product['id']);
+                                    productController
+                                        .deleteProduct(product['id']);
                                     Get.back();
                                   },
                                   child: const Text('Hapus'),
@@ -134,7 +137,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                     padding: const EdgeInsets.only(bottom: 16.0),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
                       crossAxisCount: 2,
                       childAspectRatio: 0.75,
                       crossAxisSpacing: 8.0,
@@ -146,7 +150,8 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                       return AdminPromoCard(
                         image: promo.imageUrl ?? '',
                         title: promo.titleText ?? 'Promo Title',
-                        description: promo.promoDescriptionText ?? 'Promo Description',
+                        description:
+                            promo.promoDescriptionText ?? 'Promo Description',
                         onEdit: () {
                           // Navigate to Edit Promo Page
                           Get.to(() => EditPromoPage(promoId: promo.id ?? ''));

@@ -4,7 +4,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/notification/notification_controller.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/welcome/view/welcome_page.dart';
 import './app/routes/app_pages.dart'; // Pastikan path ini sesuai dengan struktur folder Anda
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -67,6 +67,25 @@ class NotificationController extends GetxController {
       message.notification?.title ?? 'Notification',
       message.notification?.body ?? 'You have a new message.',
     );
-    // Tambahkan logika untuk navigasi atau pengolahan data sesuai pesan notifikasi
+  }
+
+  // Method to show a welcome notification
+  void showWelcomeNotification() {
+    const AndroidNotificationDetails androidPlatformChannelSpecifics =
+        AndroidNotificationDetails(
+      'welcome_channel',
+      'Welcome Notifications',
+      importance: Importance.max,
+      priority: Priority.high,
+    );
+    const NotificationDetails platformChannelSpecifics =
+        NotificationDetails(android: androidPlatformChannelSpecifics);
+
+    _localNotificationsPlugin.show(
+      8988803745093861604, // Unique ID for the welcome notification
+      'Selamat Datang!',
+      'Terima kasih telah login ke aplikasi Vape Store kami.',
+      platformChannelSpecifics,
+    );
   }
 }

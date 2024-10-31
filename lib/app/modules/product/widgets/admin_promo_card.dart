@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'dart:io';
 
 class AdminPromoCard extends StatelessWidget {
   final String image; // URL gambar promo
@@ -56,7 +55,8 @@ class AdminPromoCard extends StatelessWidget {
           // Gambar Promo
           Expanded(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(12.0)),
+              borderRadius:
+                  const BorderRadius.vertical(top: Radius.circular(12.0)),
               child: imageWidget,
             ),
           ),
@@ -76,7 +76,9 @@ class AdminPromoCard extends StatelessWidget {
                 const SizedBox(height: 4),
                 // Deskripsi Promo
                 Text(
-                  description.isNotEmpty ? description : 'Deskripsi Tidak Tersedia',
+                  description.isNotEmpty
+                      ? description
+                      : 'Deskripsi Tidak Tersedia',
                   style: const TextStyle(fontSize: 14, color: Colors.grey),
                 ),
                 const SizedBox(height: 8),
