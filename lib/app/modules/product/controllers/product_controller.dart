@@ -8,6 +8,7 @@ class ProductController extends GetxController {
   final FirebaseStorage storage = FirebaseStorage.instance;
 
   final products = <Map<String, dynamic>>[].obs;
+  final filteredProducts = <Map<String, dynamic>>[].obs; // Produk hasil filter
   final isFavorited = <RxBool>[].obs;
 
   @override
@@ -24,10 +25,30 @@ class ProductController extends GetxController {
         return data;
       }).toList();
 
+      // Sinkronisasi produk terfilter dengan semua produk
+      filteredProducts.assignAll(products);
+
+      // Inisialisasi status favorit
       isFavorited.assignAll(
         List<RxBool>.generate(products.length, (_) => false.obs),
       );
     });
+  }
+
+  // Fungsi untuk memfilter produk berdasarkan pencarian (teks atau suara)
+  void filterProducts(String query) {
+    final cleanedQuery = query.trim().toLowerCase();
+    if (cleanedQuery.isEmpty) {
+      filteredProducts.assignAll(products);
+    } else {
+      filteredProducts.assignAll(
+        products.where((product) {
+          final name = product['name']?.toLowerCase() ?? '';
+          return name.contains(cleanedQuery);
+        }).toList(),
+      );
+    }
+    print('Filtered Products: ${filteredProducts.length} items found.');
   }
 
   Future<void> addProduct({
@@ -76,7 +97,8 @@ class ProductController extends GetxController {
     };
 
     if (imageFile != null) {
-      String imageUrl = await _uploadImageToStorage(imageFile, 'product_images');
+      String imageUrl =
+          await _uploadImageToStorage(imageFile, 'product_images');
       updatedData['imageUrl'] = imageUrl;
     }
 
@@ -84,9 +106,8 @@ class ProductController extends GetxController {
   }
 
   Future<String> _uploadImageToStorage(File imageFile, String folder) async {
-    Reference storageReference = storage
-        .ref()
-        .child('$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
+    Reference storageReference = storage.ref().child(
+        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
     UploadTask uploadTask = storageReference.putFile(imageFile);
     TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
     String imageUrl = await taskSnapshot.ref.getDownloadURL();
@@ -116,5 +137,10 @@ class ProductController extends GetxController {
     firestore.collection('products').doc(productId).update({
       'likes': products[index]['likes'],
     });
+  }
+
+  // Fungsi untuk mereset hasil pencarian
+  void resetSearch() {
+    filteredProducts.assignAll(products);
   }
 }

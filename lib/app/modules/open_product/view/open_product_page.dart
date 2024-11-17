@@ -84,7 +84,7 @@ class OpenProductPage extends StatelessWidget {
                 color: isFavorited.value ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                final userId = 'current_user_id'; // ID pengguna
+                const userId = 'current_user_id'; // ID pengguna
                 productController.toggleFavorite(productIndex, userId);
               },
             ),

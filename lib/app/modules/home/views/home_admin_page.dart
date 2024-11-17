@@ -1,3 +1,4 @@
+// lib/app/modules/home_admin_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../product/controllers/product_controller.dart';
@@ -8,9 +9,11 @@ import '../../product/view/edit_product_page.dart';
 import '../../product/view/edit_promo_page.dart';
 import '../../product/widgets/admin_product_card.dart';
 import '../../product/widgets/admin_promo_card.dart';
+import '../../services/notification_list_page.dart';
+import '../../services/notification_service.dart';
 
 class HomeAdminPage extends StatefulWidget {
-  const HomeAdminPage({super.key});
+  const HomeAdminPage({Key? key}) : super(key: key);
 
   @override
   _HomeAdminPageState createState() => _HomeAdminPageState();
@@ -19,6 +22,14 @@ class HomeAdminPage extends StatefulWidget {
 class _HomeAdminPageState extends State<HomeAdminPage> {
   final PromoController promoController = Get.put(PromoController());
   final ProductController productController = Get.put(ProductController());
+  final NotificationService notificationService = NotificationService();
+
+  @override
+  void initState() {
+    super.initState();
+    // Pastikan aplikasi siap menerima notifikasi dalam semua kondisi
+    notificationService.init();
+  }
 
   void _addNewProduct() {
     Get.to(() => const AddProductPage());
@@ -32,10 +43,62 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
   Widget build(BuildContext context) => Scaffold(
         appBar: AppBar(
           title: const Text('Admin Panel'),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {
+                // Navigasi ke halaman daftar notifikasi
+                Get.to(() => const NotificationListPage());
+              },
+            ),
+          ],
         ),
         body: SingleChildScrollView(
           child: Column(
             children: [
+              // Tombol untuk memicu notifikasi
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  children: [
+                    ElevatedButton(
+                      onPressed: () {
+                        // Memicu notifikasi foreground
+                        notificationService.triggerForegroundNotification();
+                      },
+                      child: const Text('Trigger Notifikasi Foreground'),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Memicu notifikasi background setelah delay
+                        notificationService.triggerBackgroundNotification();
+                        Get.snackbar(
+                          'Notifikasi Background Dijadwalkan',
+                          'Minimalkan aplikasi untuk menguji notifikasi background.',
+                          backgroundColor: Colors.blue,
+                          colorText: Colors.white,
+                        );
+                      },
+                      child: const Text('Trigger Notifikasi Background'),
+                    ),
+                    const SizedBox(height: 10),
+                    ElevatedButton(
+                      onPressed: () {
+                        // Memicu notifikasi terminated setelah delay
+                        notificationService.triggerTerminatedNotification();
+                        Get.snackbar(
+                          'Notifikasi Terminated Dijadwalkan',
+                          'Tutup aplikasi untuk menguji notifikasi terminated.',
+                          backgroundColor: Colors.red,
+                          colorText: Colors.white,
+                        );
+                      },
+                      child: const Text('Trigger Notifikasi Terminated'),
+                    ),
+                  ],
+                ),
+              ),
               // Product Management Section
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
@@ -82,7 +145,6 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                               () => EditProductPage(productId: product['id']));
                         },
                         onDelete: () {
-                          // Confirm Deletion
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -153,11 +215,9 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                         description:
                             promo.promoDescriptionText ?? 'Promo Description',
                         onEdit: () {
-                          // Navigate to Edit Promo Page
                           Get.to(() => EditPromoPage(promoId: promo.id ?? ''));
                         },
                         onDelete: () {
-                          // Confirm Deletion
                           showDialog(
                             context: context,
                             builder: (context) => AlertDialog(
@@ -190,7 +250,6 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
         ),
         floatingActionButton: FloatingActionButton(
           onPressed: () {
-            // Show bottom sheet to choose between adding product or promo
             showModalBottomSheet(
               context: context,
               builder: (context) => Column(

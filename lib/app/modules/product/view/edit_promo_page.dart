@@ -1,16 +1,14 @@
-// edit_promo_page.dart
+// lib/app/product/view/edit_promo_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../product/controllers/promo_controller.dart';
+import '../controllers/promo_controller.dart';
 import 'dart:io';
-
-import '../widgets/promo_card.dart';
 
 class EditPromoPage extends StatefulWidget {
   final String promoId;
 
-  const EditPromoPage({super.key, required this.promoId});
+  const EditPromoPage({Key? key, required this.promoId}) : super(key: key);
 
   @override
   _EditPromoPageState createState() => _EditPromoPageState();
@@ -33,7 +31,10 @@ class _EditPromoPageState extends State<EditPromoPage> {
   }
 
   void fetchPromoData() async {
-    var doc = await promoController.firestore.collection('promos').doc(widget.promoId).get();
+    var doc = await promoController.firestore
+        .collection('promos')
+        .doc(widget.promoId)
+        .get();
     var data = doc.data();
     if (data != null) {
       titleController.text = data['titleText'] ?? '';
@@ -133,6 +134,20 @@ class _EditPromoPageState extends State<EditPromoPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
+                  // Validasi input
+                  if (titleController.text.isEmpty ||
+                      contentController.text.isEmpty ||
+                      labelController.text.isEmpty ||
+                      descriptionController.text.isEmpty) {
+                    Get.snackbar(
+                      'Error',
+                      'Semua field harus diisi.',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
                   // Update promo di controller
                   await promoController.editPromo(
                     widget.promoId,
@@ -143,8 +158,17 @@ class _EditPromoPageState extends State<EditPromoPage> {
                       promoLabelText: labelController.text,
                       promoDescriptionText: descriptionController.text,
                     ),
-                    _image, // Kirim file gambar
+                    _image, // Kirim file gambar jika ada
                   );
+
+                  // Tampilkan notifikasi setelah berhasil mengedit promo
+                  Get.snackbar(
+                    'Sukses',
+                    'Promo berhasil diperbarui.',
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+
                   Get.back();
                 },
                 child: const Text('Simpan'),

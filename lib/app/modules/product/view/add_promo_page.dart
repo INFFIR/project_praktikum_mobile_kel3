@@ -1,14 +1,14 @@
-// add_promo_page.dart
+// lib/app/product/view/add_promo_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../product/controllers/promo_controller.dart';
+
 import 'dart:io';
 
-import '../widgets/promo_card.dart';
+import '../controllers/promo_controller.dart';
 
 class AddPromoPage extends StatefulWidget {
-  const AddPromoPage({super.key});
+  const AddPromoPage({Key? key}) : super(key: key);
 
   @override
   _AddPromoPageState createState() => _AddPromoPageState();
@@ -97,6 +97,21 @@ class _AddPromoPageState extends State<AddPromoPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
+                  // Validasi input
+                  if (titleController.text.isEmpty ||
+                      contentController.text.isEmpty ||
+                      labelController.text.isEmpty ||
+                      descriptionController.text.isEmpty ||
+                      _image == null) {
+                    Get.snackbar(
+                      'Error',
+                      'Semua field harus diisi dan gambar harus dipilih.',
+                      backgroundColor: Colors.red,
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
                   // Tambahkan promo baru ke controller
                   await promoController.addPromo(
                     PromoItem(
@@ -108,6 +123,16 @@ class _AddPromoPageState extends State<AddPromoPage> {
                     ),
                     _image, // Kirim file gambar
                   );
+
+                  // Tampilkan notifikasi snackbar
+                  Get.snackbar(
+                    'Sukses',
+                    'Promo berhasil ditambahkan.',
+                    backgroundColor: Colors.green,
+                    colorText: Colors.white,
+                  );
+
+                  // Kembali ke halaman sebelumnya
                   Get.back();
                 },
                 child: const Text('Simpan'),
