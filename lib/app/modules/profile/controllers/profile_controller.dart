@@ -150,7 +150,7 @@ class ProfileController extends GetxController {
   Future<void> logout() async {
     try {
       await _auth.signOut();
-      Get.offAllNamed('/login'); // Navigate to login page
+      Get.offAllNamed('/welcome'); // Navigate to login page
     } catch (e) {
       Get.snackbar('Error', 'Failed to logout');
       print('Error logging out: $e');

@@ -4,5 +4,6 @@ class Routes {
   static const signUp = '/sign_up';
   static const home = '/home';
   static const detailProduct = '/detail_product';
+  static const settings = '/settings'; // New route for SettingsPage
   // Add more route names here as needed
 }
