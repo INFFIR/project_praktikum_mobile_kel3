@@ -65,7 +65,7 @@ class RatingController extends GetxController {
       "Thank You for the Rating",
       snackPosition: SnackPosition.TOP,
     );
-    Future.delayed(Duration(seconds: 1), () {
+    Future.delayed(const Duration(seconds: 1), () {
       Get.offNamed('/home');
     });
   }

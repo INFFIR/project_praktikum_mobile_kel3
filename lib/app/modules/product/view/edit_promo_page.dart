@@ -8,7 +8,7 @@ import 'dart:io';
 class EditPromoPage extends StatefulWidget {
   final String promoId;
 
-  const EditPromoPage({Key? key, required this.promoId}) : super(key: key);
+  const EditPromoPage({super.key, required this.promoId});
 
   @override
   _EditPromoPageState createState() => _EditPromoPageState();

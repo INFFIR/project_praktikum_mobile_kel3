@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotificationListPage extends StatelessWidget {
-  const NotificationListPage({Key? key}) : super(key: key);
+  const NotificationListPage({super.key});
 
   @override
   Widget build(BuildContext context) {

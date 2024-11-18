@@ -233,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                       likes: RxInt(product['likes'] ?? 0),
                       isFavorited: productController.isFavorited[index],
                       onFavoriteToggle: () {
-                        final userId = 'current_user_id';
+                        const userId = 'current_user_id';
                         productController.toggleFavorite(index, userId);
                       },
                       onTap: () {

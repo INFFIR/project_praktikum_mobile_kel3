@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import '../../product/controllers/product_controller.dart';
 
 class OpenProductPage extends StatelessWidget {
@@ -13,19 +15,15 @@ class OpenProductPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Mengambil data produk berdasarkan indeks
     final product = productController.products[productIndex];
     final isFavorited = productController.isFavorited[productIndex];
     final likes = RxInt(product['likes'] ?? 0);
 
-    // Mengatur data produk dengan validasi untuk nama, harga, dan URL gambar
     final String name = product['name'] ?? 'Nama Produk Tidak Tersedia';
-    final int price = product['price'] ?? 0; // Tampilkan sebagai int
+    final int price = product['price'] ?? 0;
     final String imageUrl = product['imageUrl'] ?? 'assets/product/default.jpg';
 
-    // Menampilkan gambar berdasarkan apakah imageUrl adalah URL atau rute lokal
     Widget imageWidget;
-
     if (imageUrl.startsWith('http')) {
       imageWidget = Image.network(
         imageUrl,
@@ -57,10 +55,7 @@ class OpenProductPage extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         leading: IconButton(
-          icon: const Icon(
-            Icons.arrow_back,
-            color: Colors.black,
-          ),
+          icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
             Get.back();
           },
@@ -84,7 +79,7 @@ class OpenProductPage extends StatelessWidget {
                 color: isFavorited.value ? Colors.red : Colors.black,
               ),
               onPressed: () {
-                const userId = 'current_user_id'; // ID pengguna
+                const userId = 'current_user_id';
                 productController.toggleFavorite(productIndex, userId);
               },
             ),
@@ -119,7 +114,7 @@ class OpenProductPage extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 16),
-              // Harga Produk sebagai int
+              // Harga Produk
               Text(
                 'Rp $price,-',
                 style: const TextStyle(
@@ -150,15 +145,7 @@ class OpenProductPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 20),
-              // Spesifikasi Produk
-              const Text(
-                'Specifications',
-                style: TextStyle(
-                  fontSize: 25,
-                  color: Colors.black,
-                ),
-              ),
-              const SizedBox(height: 15),
+              // Deskripsi Produk
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0),
                 child: Text(
@@ -174,28 +161,58 @@ class OpenProductPage extends StatelessWidget {
                   textAlign: TextAlign.left,
                 ),
               ),
-              const SizedBox(height: 60),
-              // Tombol Buy Now
-              ElevatedButton(
-                onPressed: () {
-                  Get.toNamed("/detail_product");
-                },
-                style: ElevatedButton.styleFrom(
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(15),
+              const SizedBox(height: 30),
+              // Tombol Review dan Buy Now
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Tombol Review
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed("/detail_product");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      backgroundColor: Colors.black,
+                    ),
+                    child: const Text(
+                      'Review',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                  backgroundColor: Colors.black,
-                  side: const BorderSide(color: Colors.black54),
-                ),
-                child: const Text(
-                  'Buy Now',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
+                  const SizedBox(width: 16),
+                  // Tombol Buy Now
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed("/home");
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12, horizontal: 20),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      backgroundColor: Colors.black,
+                      side: const BorderSide(color: Colors.black54),
+                    ),
+                    child: const Text(
+                      'Buy Now',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
             ],
           ),

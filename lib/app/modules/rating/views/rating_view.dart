@@ -3,7 +3,7 @@ import 'package:get/get.dart';
 import '../controllers/rating_controller.dart';
 
 class RatingView extends GetView<RatingController> {
-  const RatingView({Key? key}) : super(key: key);
+  const RatingView({super.key});
 
   @override
   Widget build(BuildContext context) {

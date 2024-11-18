@@ -13,7 +13,7 @@ import '../../services/notification_list_page.dart';
 import '../../services/notification_service.dart';
 
 class HomeAdminPage extends StatefulWidget {
-  const HomeAdminPage({Key? key}) : super(key: key);
+  const HomeAdminPage({super.key});
 
   @override
   _HomeAdminPageState createState() => _HomeAdminPageState();

@@ -7,10 +7,6 @@ class LoginController extends GetxController {
   final passwordController = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
 
-  @override
-  void onInit() {
-    super.onInit();
-  }
 
   // Implement Firebase Authentication login
   Future<bool> login() async {

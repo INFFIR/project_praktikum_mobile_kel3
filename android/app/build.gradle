@@ -14,12 +14,12 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     defaultConfig {
@@ -47,6 +47,8 @@ android {
         implementation platform('com.google.firebase:firebase-bom:32.2.0') // Sesuaikan dengan versi terbaru
         implementation 'com.google.firebase:firebase-auth'
         implementation 'com.google.firebase:firebase-messaging'
+        implementation 'androidx.activity:activity:1.6.1' // Versi terbaru
+        implementation 'androidx.core:core-ktx:1.10.0'
     }
     // Dependencies lainnya
 
