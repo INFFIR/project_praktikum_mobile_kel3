@@ -28,7 +28,7 @@ class BottomNavBar extends StatelessWidget {
             Get.toNamed('/home');
             break;
           case 2:
-            Get.toNamed('/home');
+            Get.toNamed('/rating');
             break;
           case 3:
             Get.toNamed('/profile');
