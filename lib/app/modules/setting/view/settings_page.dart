@@ -18,18 +18,18 @@ class SettingsPage extends StatelessWidget {
             width: double.maxFinite,
             child: Obx(() => ListView.builder(
               shrinkWrap: true,
-              itemCount: audioManager.availableMusic.length,
+              itemCount: audioManager.availableMusic.keys.length,
               itemBuilder: (BuildContext context, int index) {
-                String bgmFile = audioManager.availableMusic[index];
-                bool isCurrent = audioManager.currentBgm.value == bgmFile;
+                String bgmName = audioManager.availableMusic.keys.toList()[index];
+                bool isCurrent = audioManager.currentBgm.value == bgmName;
                 return ListTile(
-                  title: Text(bgmFile),
+                  title: Text(bgmName), // Display the name of the music
                   trailing: IconButton(
                     icon: const Icon(Icons.play_arrow),
                     onPressed: isCurrent
                         ? null  // Don't re-play the same music
                         : () async {
-                            await audioManager.playBackgroundMusic(bgmFile, loop: true);
+                            await audioManager.playBackgroundMusic(bgmName, loop: true);
                             Get.back();  // Close the dialog
                           },
                   ),
@@ -39,7 +39,7 @@ class SettingsPage extends StatelessWidget {
                   onTap: isCurrent
                       ? null  // Don't do anything if it's already playing
                       : () async {
-                          await audioManager.playBackgroundMusic(bgmFile, loop: true);
+                          await audioManager.playBackgroundMusic(bgmName, loop: true);
                           Get.back();  // Close the dialog
                         },
                 );
