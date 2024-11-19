@@ -69,20 +69,30 @@ class DetailPersonReview extends StatelessWidget {
             const SizedBox(height: 24),
             if (image != null)
               Padding(
-                padding: const EdgeInsets.only(top: 16.0),
-                child: Image.file(
-                  image!,
-                  width: double.infinity,
-                  height: 250,
-                  fit: BoxFit.cover,
+                padding: const EdgeInsets.only(bottom: 16.0),
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  clipBehavior: Clip.hardEdge,
+                  child: Image.file(
+                    image!,
+                    width: double.infinity,
+                    height: 250,
+                    fit: BoxFit.cover,
+                  ),
                 ),
               ),
-            const SizedBox(height: 16),
             if (video != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Container(
-                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  clipBehavior: Clip.hardEdge,
                   child: VideoPlayerWidget(file: video!),
                 ),
               ),

@@ -246,9 +246,15 @@ class _DetailProductPageState extends State<DetailProductPage> {
                   ),
                 ),
               if (video != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: VideoPlayerWidget(file: video),
+                const Padding(
+                  padding: EdgeInsets.only(top: 8.0),
+                  child: Text(
+                    "Click for detail",
+                    style: TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
             ],
           ),
@@ -340,7 +346,6 @@ class _DetailProductPageState extends State<DetailProductPage> {
           _showAddReviewDialog(context);
         },
         child: const Icon(Icons.add),
-        backgroundColor: Colors.blue,
       ),
     );
   }
