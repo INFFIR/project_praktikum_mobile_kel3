@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
-import 'package:video_player/video_player.dart';
-import 'detail_person_review.dart'; // Import halaman detail review
+import '../controllers/detail_product_controller.dart';
+import '../widget/video_player.dart';
+import 'detail_person_review.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
 class DetailProductPage extends StatefulWidget {
   const DetailProductPage({super.key});
@@ -12,73 +15,260 @@ class DetailProductPage extends StatefulWidget {
 }
 
 class _DetailProductPageState extends State<DetailProductPage> {
-  final String _imageAssetPath = 'assets/product/product0.jpg';
+  final DetailProductController controller = Get.find();
 
-  // List review dinamis
-  final List<Map<String, dynamic>> _reviews = [
-    {
-      'rating': '4.2',
-      'reviewer': 'Amat',
-      'date': '1 Jan 2024',
-      'comment': 'Recommended item and according to order',
-      'image': null,
-      'video': null,
-    },
-    {
-      'rating': '4.7',
-      'reviewer': 'Amat',
-      'date': '10 Jan 2024',
-      'comment': 'Best stuff!!!',
-      'image': null,
-      'video': null,
-    },
-  ];
-
-  void _addReview(String rating, String reviewer, String comment, File? image, File? video) {
-    setState(() {
-      _reviews.insert(0, {
-        'rating': rating,
-        'reviewer': reviewer,
-        'date': _getCurrentDate(),
-        'comment': comment,
-        'image': image,
-        'video': video,
-      });
-    });
+  void _addReview(double rating, String reviewer, String comment, File? image, File? video) {
+    controller.addReview(rating, reviewer, comment, image, video);
   }
 
-  String _getCurrentDate() {
-    final DateTime now = DateTime.now();
-    return '${now.day} ${_monthToString(now.month)} ${now.year}';
+  void _showAddReviewDialog(BuildContext context) {
+    final TextEditingController reviewerController = TextEditingController();
+    double rating = 3.0;
+    File? selectedImage;
+    File? selectedVideo;
+
+    Future<void> _pickImage() async {
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          selectedImage = File(pickedFile.path);
+        });
+      }
+    }
+
+    Future<void> _pickVideo() async {
+      final pickedFile = await ImagePicker().pickVideo(source: ImageSource.camera);
+      if (pickedFile != null) {
+        setState(() {
+          selectedVideo = File(pickedFile.path);
+        });
+      }
+    }
+
+    // Reset comment sebelum membuka dialog
+    controller.commentController.clear();
+    controller.commentText.value = '';
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Dialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              elevation: 5,
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Add Review',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Rating',
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      RatingBar.builder(
+                        initialRating: rating,
+                        minRating: 1,
+                        maxRating: 5,
+                        direction: Axis.horizontal,
+                        allowHalfRating: true,
+                        itemCount: 5,
+                        itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        itemBuilder: (context, _) => const Icon(
+                          Icons.star,
+                          color: Colors.amber,
+                        ),
+                        onRatingUpdate: (newRating) {
+                          setState(() {
+                            rating = newRating;
+                          });
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      TextField(
+                        controller: reviewerController,
+                        decoration: InputDecoration(
+                          labelText: 'Reviewer Name',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Obx(() => TextField(
+                            controller: controller.commentController,
+                            onChanged: (value) {
+                              controller.commentText.value = value;
+                            },
+                            maxLines: 3,
+                            decoration: InputDecoration(
+                              labelText: 'Comment',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              suffixIcon: IconButton(
+                                icon: Icon(
+                                  controller.isListening.value ? Icons.mic_off : Icons.mic,
+                                ),
+                                onPressed: () {
+                                  controller.toggleListening();
+                                },
+                              ),
+                            ),
+                          )),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: _pickImage,
+                        child: const Text('Pick Image'),
+                      ),
+                      const SizedBox(height: 8),
+                      ElevatedButton(
+                        onPressed: _pickVideo,
+                        child: const Text('Pick Video'),
+                      ),
+                      const SizedBox(height: 16),
+                      ElevatedButton(
+                        onPressed: () {
+                          if (reviewerController.text.isNotEmpty &&
+                              controller.commentController.text.isNotEmpty) {
+                            _addReview(
+                              rating,
+                              reviewerController.text,
+                              controller.commentController.text,
+                              selectedImage,
+                              selectedVideo,
+                            );
+                            Navigator.pop(context);
+                          } else {
+                            Get.snackbar(
+                              "Informasi Tidak Lengkap",
+                              "Harap isi nama reviewer dan komentar.",
+                              snackPosition: SnackPosition.BOTTOM,
+                            );
+                          }
+                        },
+                        child: const Text('Submit Review'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
-  String _monthToString(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'
-    ];
-    return months[month - 1];
+  Widget _buildReview(
+      double rating,
+      String reviewer,
+      String date,
+      String comment,
+      File? image,
+      File? video,
+      BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => DetailPersonReview(
+              rating: rating.toString(),
+              reviewer: reviewer,
+              date: date,
+              comment: comment,
+              image: image,
+              video: video,
+            ),
+          ),
+        );
+      },
+      child: Card(
+        elevation: 4,
+        margin: const EdgeInsets.symmetric(vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  RatingBarIndicator(
+                    rating: rating,
+                    itemBuilder: (context, index) => const Icon(
+                      Icons.star,
+                      color: Colors.amber,
+                    ),
+                    itemCount: 5,
+                    itemSize: 24.0,
+                    direction: Axis.horizontal,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$rating/5',
+                    style: const TextStyle(fontSize: 16, color: Colors.grey),
+                  ),
+                  const Spacer(),
+                  Text(
+                    'By $reviewer',
+                    style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(date, style: const TextStyle(color: Colors.grey)),
+              const SizedBox(height: 8),
+              Text(comment),
+              if (image != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: Image.file(
+                    image,
+                    width: double.infinity,
+                    height: 200,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+              if (video != null)
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: VideoPlayerWidget(file: video),
+                ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        title: const Text('Detail Product'),
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: Colors.black),
           onPressed: () {
-            Navigator.pop(context); // Navigate back
+            Navigator.pop(context);
           },
-        ),
-        title: const Text(
-          '9:41',
-          style: TextStyle(
-            color: Colors.black,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
-          ),
         ),
         centerTitle: true,
       ),
@@ -111,7 +301,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(12),
                   child: Image.asset(
-                    _imageAssetPath,
+                    controller.imageAssetPath,
                     width: 250,
                     height: 250,
                     fit: BoxFit.cover,
@@ -126,19 +316,21 @@ class _DetailProductPageState extends State<DetailProductPage> {
             ),
             const SizedBox(height: 8),
             Expanded(
-              child: ListView(
-                children: _reviews.map((review) {
-                  return _buildReview(
-                    review['rating'],
-                    review['reviewer'],
-                    review['date'],
-                    review['comment'],
-                    review['image'],
-                    review['video'],
-                    context, // Pass context to navigate
-                  );
-                }).toList(),
-              ),
+              child: Obx(() {
+                return ListView(
+                  children: controller.reviews.map((review) {
+                    return _buildReview(
+                      review['rating'] as double,
+                      review['reviewer'],
+                      review['date'],
+                      review['comment'],
+                      review['image'],
+                      review['video'],
+                      context,
+                    );
+                  }).toList(),
+                );
+              }),
             ),
           ],
         ),
@@ -149,192 +341,6 @@ class _DetailProductPageState extends State<DetailProductPage> {
         },
         child: const Icon(Icons.add),
         backgroundColor: Colors.blue,
-      ),
-    );
-  }
-
-  Widget _buildReview(String rating, String reviewer, String date, String comment, File? image, File? video, BuildContext context) {
-    return GestureDetector(
-      onTap: () {
-        // Navigate to the detail review page when tapped
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => DetailPersonReview(
-              rating: rating,
-              reviewer: reviewer,
-              date: date,
-              comment: comment,
-              image: image,
-              video: video, // Pass video to detail review page
-            ),
-          ),
-        );
-      },
-      child: Card(
-        elevation: 4,
-        margin: const EdgeInsets.symmetric(vertical: 8),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Text(
-                    rating,
-                    style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                  ),
-                  const Text(
-                    '/5',
-                    style: TextStyle(fontSize: 18, color: Colors.grey),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    'By $reviewer',
-                    style: const TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 8),
-              Text(date, style: const TextStyle(color: Colors.grey)),
-              const SizedBox(height: 8),
-              Text(comment),
-              if (image != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: Image.file(
-                    image,
-                    width: 100,
-                    height: 100,
-                    fit: BoxFit.cover,
-                  ),
-                ),
-              if (video != null)
-                Padding(
-                  padding: const EdgeInsets.only(top: 8.0),
-                  child: VideoPlayerWidget(file: video),
-                ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showAddReviewDialog(BuildContext context) {
-    final TextEditingController ratingController = TextEditingController();
-    final TextEditingController reviewerController = TextEditingController();
-    final TextEditingController commentController = TextEditingController();
-    File? selectedImage;
-    File? selectedVideo;
-
-    Future<void> _pickImage() async {
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
-      if (pickedFile != null) {
-        setState(() {
-          selectedImage = File(pickedFile.path);
-        });
-      }
-    }
-
-    Future<void> _pickVideo() async {
-      final pickedFile = await ImagePicker().pickVideo(source: ImageSource.camera);
-      if (pickedFile != null) {
-        setState(() {
-          selectedVideo = File(pickedFile.path);
-        });
-      }
-    }
-
-    showDialog(
-      context: context,
-      builder: (context) {
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          elevation: 5,
-          child: Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'Add Review',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: ratingController,
-                  decoration: const InputDecoration(labelText: 'Rating (1-5)'),
-                  keyboardType: TextInputType.number,
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: reviewerController,
-                  decoration: const InputDecoration(labelText: 'Reviewer Name'),
-                ),
-                const SizedBox(height: 8),
-                TextField(
-                  controller: commentController,
-                  decoration: const InputDecoration(labelText: 'Comment'),
-                  maxLines: 3,
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: _pickImage,
-                  child: const Text('Pick Image'),
-                ),
-                const SizedBox(height: 8),
-                ElevatedButton(
-                  onPressed: _pickVideo,
-                  child: const Text('Pick Video'),
-                ),
-                const SizedBox(height: 16),
-                ElevatedButton(
-                  onPressed: () {
-                    if (ratingController.text.isNotEmpty &&
-                        reviewerController.text.isNotEmpty &&
-                        commentController.text.isNotEmpty) {
-                      _addReview(
-                        ratingController.text,
-                        reviewerController.text,
-                        commentController.text,
-                        selectedImage,
-                        selectedVideo,
-                      );
-                      Navigator.pop(context);
-                    }
-                  },
-                  child: const Text('Submit Review'),
-                ),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-}
-
-class VideoPlayerWidget extends StatelessWidget {
-  final File file;
-  const VideoPlayerWidget({required this.file, super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 200,
-      child: Center(
-        child: Text('Video Player for ${file.path}'),
       ),
     );
   }

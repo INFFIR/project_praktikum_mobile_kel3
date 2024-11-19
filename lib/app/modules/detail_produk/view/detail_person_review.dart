@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 import 'dart:io';
-import 'package:video_player/video_player.dart';
+import '../widget/video_player.dart';
 
 class DetailPersonReview extends StatelessWidget {
   final String rating;
@@ -22,10 +23,13 @@ class DetailPersonReview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    double parsedRating = double.tryParse(rating) ?? 0.0;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Review Detail'),
         backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -33,15 +37,22 @@ class DetailPersonReview extends StatelessWidget {
           children: [
             Row(
               children: [
+                RatingBarIndicator(
+                  rating: parsedRating,
+                  itemBuilder: (context, index) => const Icon(
+                    Icons.star,
+                    color: Colors.amber,
+                  ),
+                  itemCount: 5,
+                  itemSize: 24.0,
+                  direction: Axis.horizontal,
+                ),
+                const SizedBox(width: 8),
                 Text(
-                  rating,
-                  style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                  '$parsedRating/5',
+                  style: const TextStyle(fontSize: 16, color: Colors.grey),
                 ),
-                const Text(
-                  '/5',
-                  style: TextStyle(fontSize: 18, color: Colors.grey),
-                ),
-                const SizedBox(width: 16),
+                const Spacer(),
                 Text(
                   'By $reviewer',
                   style: const TextStyle(fontSize: 16, color: Colors.black54),
@@ -55,7 +66,7 @@ class DetailPersonReview extends StatelessWidget {
               comment,
               style: const TextStyle(fontSize: 16),
             ),
-            const SizedBox(height: 120), // Increased space before the image or video
+            const SizedBox(height: 24),
             if (image != null)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
@@ -66,10 +77,10 @@ class DetailPersonReview extends StatelessWidget {
                   fit: BoxFit.cover,
                 ),
               ),
-            const SizedBox(height: 16), // Add space between image and video
+            const SizedBox(height: 16),
             if (video != null)
               Padding(
-                padding: const EdgeInsets.only(top: 16.0), // Increased space before video
+                padding: const EdgeInsets.only(top: 16.0),
                 child: Container(
                   alignment: Alignment.center,
                   child: VideoPlayerWidget(file: video!),
@@ -79,81 +90,5 @@ class DetailPersonReview extends StatelessWidget {
         ),
       ),
     );
-  }
-}
-
-class VideoPlayerWidget extends StatefulWidget {
-  final File file;
-
-  const VideoPlayerWidget({super.key, required this.file});
-
-  @override
-  _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
-}
-
-class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
-  late VideoPlayerController _controller;
-  bool isPlaying = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _controller = VideoPlayerController.file(widget.file)
-      ..initialize().then((_) {
-        setState(() {});
-      });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return _controller.value.isInitialized
-        ? Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AspectRatio(
-                aspectRatio: _controller.value.aspectRatio,
-                child: VideoPlayer(_controller),
-              ),
-              const SizedBox(height: 12), // More space between the video and controls
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: Icon(
-                      isPlaying ? Icons.pause : Icons.play_arrow,
-                      size: 40,
-                      color: Colors.white,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        if (isPlaying) {
-                          _controller.pause();
-                        } else {
-                          _controller.play();
-                        }
-                        isPlaying = !isPlaying;
-                      });
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.stop, size: 40, color: Colors.red),
-                    onPressed: () {
-                      _controller.seekTo(Duration.zero);
-                      setState(() {
-                        isPlaying = false;
-                      });
-                    },
-                  ),
-                ],
-              ),
-            ],
-          )
-        : const Center(child: CircularProgressIndicator());
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
-    _controller.dispose();
   }
 }
