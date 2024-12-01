@@ -13,6 +13,8 @@ class AudioManager extends GetxService {
     'BGM 1': 'https://firebasestorage.googleapis.com/v0/b/praktikum-mobile-kel3-b1e1c.appspot.com/o/bgm%2Fbgm1.mp3?alt=media&token=8305ab2b-cc52-4507-9723-a2ba0054dd04',
     'BGM 2': 'https://firebasestorage.googleapis.com/v0/b/praktikum-mobile-kel3-b1e1c.appspot.com/o/bgm%2Fbgm2.mp3?alt=media&token=455fcf4c-92d1-432e-98b6-3fcd040cb92e',
     'BGM 3': 'https://firebasestorage.googleapis.com/v0/b/praktikum-mobile-kel3-b1e1c.appspot.com/o/bgm%2Fbgm3.mp3?alt=media&token=472cf624-4e30-452a-9174-b64a742a2d8c',
+    'BGM 4': 'https://firebasestorage.googleapis.com/v0/b/praktikum-mobile-kel3-b1e1c.appspot.com/o/bgm%2Fbgm4.mp3?alt=media&token=472cf624-4e30-452a-9174-b64a742a2d8c',
+    'BGM 5': 'https://firebasestorage.googleapis.com/v0/b/praktikum-mobile-kel3-b1e1c.appspot.com/o/bgm%2Fbgm5.mp3?alt=media&token=472cf624-4e30-452a-9174-b64a742a2d8c',
   }.obs;
 
   // Reactive volume control

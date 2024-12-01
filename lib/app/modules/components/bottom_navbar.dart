@@ -46,8 +46,8 @@ class BottomNavBar extends StatelessWidget {
           label: 'Favorites',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Cart',
+          icon: Icon(Icons.location_on),
+          label: 'Location',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

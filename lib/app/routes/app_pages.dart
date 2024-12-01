@@ -9,8 +9,8 @@ import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welco
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
-import '../modules/rating/bindings/rating_binding.dart';
-import '../modules/rating/views/rating_view.dart';
+import '../modules/location/bindings/location_binding.dart';
+import '../modules/location/views/location_view.dart';
 import '../modules/setting/view/settings_page.dart';
 import '../modules/sign_up/bindings/auth_binding.dart.dart';
 import '../modules/sign_up/view/sign_up_screen.dart.dart';
@@ -61,11 +61,11 @@ class AppPages {
       page: () => const SettingsPage(),
       // binding: SettingsBinding(),
     ),
-     GetPage(
-      name: Routes.rating,
-      page: () => const RatingView(),
-      binding: RatingBinding(),
-    ),
+    //  GetPage(
+    //   name: Routes.rating,
+    //   page: () => const RatingView(),
+    //   binding: RatingBinding(),
+    // ),
 
   ];
 }
