@@ -43,9 +43,12 @@ dependencies:
   http: ^1.2.2
   speech_to_text: ^7.0.0
   permission_handler: ^11.0.1
+  google_maps_flutter: ^2.2.0
+  get_storage: ^2.1.1
+  geolocator: ^11.1.0 # untuk mengambil data lokasi GPS
+  geocoding: ^3.0.0 # untuk konversi koordinat ke nama tempat
+  url_launcher: ^6.0.12 # untuk membuka URL Google Maps
 
-  # The following adds the Cupertino Icons font to your application.
-  # Use with the CupertinoIcons class for iOS style icons.
 
 dev_dependencies:
   flutter_test:

@@ -1,23 +1,32 @@
-import 'dart:io';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_storage/firebase_storage.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:url_launcher/url_launcher.dart'; // Tambahkan untuk membuka URL
 
 class ProfileController extends GetxController {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final FirebaseStorage _storage = FirebaseStorage.instance;
+  final box = GetStorage();
+  final ImagePicker _picker = ImagePicker();
+  var latitude = 0.0.obs;
+  var longitude = 0.0.obs;
+  var currentAddress = ''.obs;
 
+  // Controllers untuk username, email, password, dan alamat
   final usernameController = TextEditingController();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+  final addressController =
+      TextEditingController(); // Controller untuk alamat manual
 
-  Rx<File?> imageFile = Rx<File?>(null);
-  RxString imageUrl = ''.obs;
-  RxBool isLoading = false.obs;
+  // State observables
+  RxString imagePath = ''.obs; // Path gambar profil
+  RxBool isImageLoading = false.obs; // Loading state untuk memilih gambar
+  RxBool isLoading = false.obs; // Loading state untuk update profil
+  Rx<LatLng> currentPosition =
+      const LatLng(0, 0).obs; // Menyimpan lokasi koordinat
 
   @override
   void onInit() {
@@ -25,143 +34,192 @@ class ProfileController extends GetxController {
     loadUserData();
   }
 
-  // Load user data from Firebase Auth and Firestore
-  void loadUserData() async {
-    final user = _auth.currentUser;
-    if (user != null) {
-      emailController.text = user.email ?? '';
-
-      try {
-        // Load additional profile data from Firestore
-        final userDoc =
-            await _firestore.collection('users').doc(user.uid).get();
-        if (userDoc.exists) {
-          usernameController.text = userDoc['username'] ?? '';
-          imageUrl.value = userDoc['profileImageUrl'] ?? '';
-        }
-
-        // Load profile picture if the URL exists
-        if (imageUrl.value.isEmpty) {
-          await _loadProfilePicture(user.uid);
-        }
-      } catch (e) {
-        Get.snackbar('Error', 'Failed to load profile data');
-        print('Error loading profile data: $e');
-      }
-    } else {
-      Get.snackbar('Error', 'User not logged in');
-    }
+  @override
+  void onClose() {
+    usernameController.dispose();
+    emailController.dispose();
+    passwordController.dispose();
+    addressController.dispose();
+    super.onClose();
   }
 
-  // Load profile picture URL from Firebase Storage
-  Future<void> _loadProfilePicture(String uid) async {
+  // Fungsi untuk load data user dari GetStorage
+  void loadUserData() {
     try {
-      final ref = _storage.ref().child('profile_pictures/$uid');
-      imageUrl.value = await ref.getDownloadURL();
+      usernameController.text = box.read('username') ?? '';
+      emailController.text = box.read('userEmail') ?? '';
+      imagePath.value = box.read('profileImagePath') ?? '';
     } catch (e) {
-      print('No profile picture found or error loading picture: $e');
+      Get.snackbar('Error', 'Gagal memuat data profil');
+      print('Error loading user data: $e');
     }
   }
 
-  // Pick an image from the gallery or camera
+  // Fungsi untuk memilih gambar
   Future<void> pickImage(ImageSource source) async {
     try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? pickedFile = await picker.pickImage(
+      isImageLoading.value = true;
+      final XFile? pickedFile = await _picker.pickImage(
         source: source,
-        maxWidth: 500, // Optional: Limit image size to reduce memory usage
+        maxWidth: 500,
         maxHeight: 500,
       );
 
       if (pickedFile != null) {
-        imageFile.value = File(pickedFile.path);
-        await uploadProfilePicture();
+        imagePath.value = pickedFile.path;
+        await saveProfileImage();
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to pick image');
+      Get.snackbar('Error', 'Gagal memilih gambar');
       print('Error picking image: $e');
-    }
-  }
-
-  // Upload profile picture to Firebase Storage and update Firestore
-  Future<void> uploadProfilePicture() async {
-    if (imageFile.value == null) return;
-
-    try {
-      isLoading.value = true;
-      final user = _auth.currentUser;
-      if (user == null) {
-        Get.snackbar('Error', 'User not authenticated');
-        return;
-      }
-
-      // Upload to Firebase Storage
-      final ref = _storage.ref().child('profile_pictures/${user.uid}');
-      await ref.putFile(imageFile.value!);
-      final downloadUrl = await ref.getDownloadURL();
-
-      // Update Firestore with new image URL
-      await _firestore.collection('users').doc(user.uid).update({
-        'profileImageUrl': downloadUrl,
-      });
-      imageUrl.value = downloadUrl;
-
-      Get.snackbar('Success', 'Profile picture updated successfully',
-          snackPosition: SnackPosition.BOTTOM);
-    } catch (e) {
-      Get.snackbar('Error', 'Failed to update profile picture');
-      print('Error uploading profile picture: $e');
     } finally {
-      isLoading.value = false;
+      isImageLoading.value = false;
     }
   }
 
-  // Update profile information
+  // Simpan gambar profil ke GetStorage
+  Future<void> saveProfileImage() async {
+    try {
+      await box.write('profileImagePath', imagePath.value);
+      Get.snackbar('Success', 'Gambar profil berhasil disimpan');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menyimpan gambar profil');
+      print('Error saving profile image: $e');
+    }
+  }
+
+  // Fungsi untuk memperbarui data profil
   Future<void> updateProfile() async {
     try {
       isLoading.value = true;
-      final user = _auth.currentUser;
-      if (user == null) {
-        Get.snackbar('Error', 'User not authenticated');
-        return;
-      }
+
+      await box.write('username', usernameController.text);
+      await box.write('userEmail', emailController.text);
 
       if (passwordController.text.isNotEmpty) {
-        await user.updatePassword(passwordController.text);
+        await box.write('userPassword', passwordController.text);
       }
 
-      // Update additional information in Firestore
-      await _firestore.collection('users').doc(user.uid).update({
-        'username': usernameController.text,
-        'email': emailController.text,
-      });
+      // Update alamat yang ada di addressController
+      await saveAddressToFirebase(addressController.text);
 
-      Get.snackbar('Success', 'Profile updated successfully',
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar('Success', 'Profil berhasil diperbarui');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to update profile');
+      Get.snackbar('Error', 'Gagal memperbarui profil');
       print('Error updating profile: $e');
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Logout function
+  // Fungsi untuk logout
   Future<void> logout() async {
     try {
-      await _auth.signOut();
-      Get.offAllNamed('/login'); // Navigate to login page
+      await box.erase();
+      Get.offAllNamed('/login');
     } catch (e) {
-      Get.snackbar('Error', 'Failed to logout');
-      print('Error logging out: $e');
+      Get.snackbar('Error', 'Gagal logout');
+      print('Error during logout: $e');
     }
   }
 
-  @override
-  void onClose() {
-    usernameController.dispose();
-    emailController.dispose();
-    passwordController.dispose();
-    super.onClose();
+  // Fungsi untuk mengambil lokasi saat ini dan mengonversinya menjadi alamat
+  Future<void> fetchCurrentLocation() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) {
+        Get.snackbar('Error', 'Aktifkan layanan lokasi');
+        return;
+      }
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Get.snackbar('Error', 'Izin lokasi ditolak');
+          return;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        Get.snackbar('Error', 'Izin lokasi ditolak secara permanen');
+        return;
+      }
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      currentAddress.value =
+          'Lat: ${position.latitude}, Long: ${position.longitude}';
+
+      // Simpan alamat ke Firebase
+      await saveAddressToFirebase(currentAddress.value);
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal mengambil lokasi');
+      print('Error fetching location: $e');
+    }
+  }
+
+  // Fungsi untuk membuka Google Maps
+  void openGoogleMaps() async {
+    if (addressController.text.isNotEmpty) {
+      // Jika alamat dimasukkan manual, buka Google Maps
+      String googleUrl =
+          "https://www.google.com/maps?q=${addressController.text}";
+      if (await canLaunch(googleUrl)) {
+        await launchUrl(Uri.parse(googleUrl));
+      } else {
+        Get.snackbar('Error', 'Google Maps tidak dapat dibuka');
+      }
+    } else if (currentAddress.value.isNotEmpty) {
+      // Jika lokasi GPS tersedia, buka berdasarkan koordinat
+      var latLng = currentAddress.value.split(", ");
+      if (latLng.length == 2) {
+        double latitude =
+            double.tryParse(latLng[0].replaceAll('Lat: ', '')) ?? 0.0;
+        double longitude =
+            double.tryParse(latLng[1].replaceAll('Long: ', '')) ?? 0.0;
+        String googleUrl = "https://www.google.com/maps?q=$latitude,$longitude";
+        if (await canLaunch(googleUrl)) {
+          await launchUrl(Uri.parse(googleUrl));
+        } else {
+          Get.snackbar('Error', 'Google Maps tidak dapat dibuka');
+        }
+      }
+    }
+  }
+
+// Add this function to your ProfileController
+  Future<void> updateManualAddress(String newAddress) async {
+    try {
+      // Set the new address to the currentAddress observable
+      currentAddress.value = newAddress;
+
+      // Optionally, update the address in Firebase if needed
+      await saveAddressToFirebase(newAddress);
+
+      Get.snackbar('Success', 'Alamat berhasil diperbarui');
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal memperbarui alamat');
+      print('Error updating address: $e');
+    }
+  }
+
+  // Simpan alamat ke Firebase
+  Future<void> saveAddressToFirebase(String address) async {
+    try {
+      final uid = box.read('uid'); // Ambil UID user dari storage
+      if (uid != null) {
+        await FirebaseFirestore.instance
+            .collection('users')
+            .doc(uid)
+            .update({'address': address});
+        Get.snackbar('Success', 'Alamat berhasil diperbarui');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Gagal menyimpan alamat');
+      print('Error saving address: $e');
+    }
   }
 }
