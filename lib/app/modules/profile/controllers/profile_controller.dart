@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+
 import 'package:get_storage/get_storage.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:image_picker/image_picker.dart';
@@ -13,6 +15,7 @@ class ProfileController extends GetxController {
   var latitude = 0.0.obs;
   var longitude = 0.0.obs;
   var currentAddress = ''.obs;
+  final FirebaseAuth _auth = FirebaseAuth.instance; // Menambahkan FirebaseAuth
 
   // Controllers untuk username, email, password, dan alamat
   final usernameController = TextEditingController();
@@ -115,8 +118,10 @@ class ProfileController extends GetxController {
   // Fungsi untuk logout
   Future<void> logout() async {
     try {
-      await box.erase();
-      Get.offAllNamed('/login');
+      await _auth.signOut(); // Menggunakan FirebaseAuth untuk sign out
+      Get.offAllNamed('/welcome'); // Arahkan ke halaman welcome setelah logout
+      await box.erase(); // Hapus data dari GetStorage
+      Get.offAllNamed('/login'); // Arahkan ke halaman login
     } catch (e) {
       Get.snackbar('Error', 'Gagal logout');
       print('Error during logout: $e');

@@ -28,7 +28,7 @@ class BottomNavBar extends StatelessWidget {
             Get.toNamed('/home');
             break;
           case 2:
-            Get.toNamed('/home');
+            Get.toNamed('/rating');
             break;
           case 3:
             Get.toNamed('/profile');
@@ -46,8 +46,8 @@ class BottomNavBar extends StatelessWidget {
           label: 'Favorites',
         ),
         BottomNavigationBarItem(
-          icon: Icon(Icons.shopping_cart),
-          label: 'Cart',
+          icon: Icon(Icons.location_on),
+          label: 'Location',
         ),
         BottomNavigationBarItem(
           icon: Icon(Icons.person),

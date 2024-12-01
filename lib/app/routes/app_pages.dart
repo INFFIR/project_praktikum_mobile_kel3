@@ -1,12 +1,17 @@
 import 'package:get/get.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/bindings/home_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welcome_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
+import '../modules/location/bindings/location_binding.dart';
+import '../modules/location/views/location_view.dart';
+import '../modules/setting/view/settings_page.dart';
 import '../modules/sign_up/bindings/auth_binding.dart.dart';
 import '../modules/sign_up/view/sign_up_screen.dart.dart';
 import '../modules/welcome/view/welcome_page.dart';
@@ -18,6 +23,7 @@ class AppPages {
     GetPage(
       name: Routes.welcome,
       page: () => const WelcomePage(),
+      binding: WelcomeBinding(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     // Add more routes here as needed
@@ -41,12 +47,25 @@ class AppPages {
     GetPage(
       name: Routes.detailProduct,
       page: () => const DetailProductPage(),
+      binding: DetailProductBindings(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     GetPage(
       name: '/profile',
       page: () => const ProfileView(),
       binding: ProfileBinding(),
-    )
+    ),
+    // New route for SettingsPage
+    GetPage(
+      name: Routes.settings,
+      page: () => const SettingsPage(),
+      // binding: SettingsBinding(),
+    ),
+    //  GetPage(
+    //   name: Routes.rating,
+    //   page: () => const RatingView(),
+    //   binding: RatingBinding(),
+    // ),
+
   ];
 }

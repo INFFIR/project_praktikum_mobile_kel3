@@ -1,13 +1,16 @@
+// lib/pages/home_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
+import '../../../routes/app_routes.dart';
 import '../../components/bottom_navbar.dart';
 import '../../open_product/view/open_product_page.dart';
 import '../../product/controllers/product_controller.dart';
 import '../../product/controllers/promo_controller.dart';
 import '../../product/widgets/promo_card.dart';
-import '../../product/widgets/product_card.dart';
+import '../../product/widgets/product_card.dart'; // Ensure correct import if needed
 import 'home_admin_page.dart';
 import '../../services/notification_list_page.dart';
 
@@ -50,10 +53,29 @@ class _HomePageState extends State<HomePage> {
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            IconButton(
-              icon: const Icon(Icons.menu),
-              onPressed: () {
-                Get.to(() => const HomeAdminPage());
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.menu), // Three-line menu icon
+              onSelected: (String value) {
+                if (value == 'Admin Panel') {
+                  Get.to(() => const HomeAdminPage());
+                } else if (value == 'Settings') {
+                  // Use named route to ensure bindings are applied
+                  Get.toNamed(Routes.settings);
+                  // Alternatively, you can use:
+                  // Get.to(() => const SettingsPage(), binding: SettingsBinding());
+                }
+              },
+              itemBuilder: (BuildContext context) {
+                return [
+                  const PopupMenuItem<String>(
+                    value: 'Admin Panel',
+                    child: Text('Admin Panel'),
+                  ),
+                  const PopupMenuItem<String>(
+                    value: 'Settings',
+                    child: Text('Settings'),
+                  ),
+                ];
               },
             ),
             IconButton(
@@ -211,7 +233,7 @@ class _HomePageState extends State<HomePage> {
                       likes: RxInt(product['likes'] ?? 0),
                       isFavorited: productController.isFavorited[index],
                       onFavoriteToggle: () {
-                        final userId = 'current_user_id';
+                        const userId = 'current_user_id';
                         productController.toggleFavorite(index, userId);
                       },
                       onTap: () {

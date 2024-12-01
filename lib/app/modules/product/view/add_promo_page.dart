@@ -8,7 +8,7 @@ import 'dart:io';
 import '../controllers/promo_controller.dart';
 
 class AddPromoPage extends StatefulWidget {
-  const AddPromoPage({Key? key}) : super(key: key);
+  const AddPromoPage({super.key});
 
   @override
   _AddPromoPageState createState() => _AddPromoPageState();

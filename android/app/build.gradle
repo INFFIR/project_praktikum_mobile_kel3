@@ -14,31 +14,26 @@ android {
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_1_8
+        jvmTarget = JavaVersion.VERSION_17
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "com.example.project_praktikum_mobile_kel3"
-        // You can update the following values to match your application needs.
-        // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdkVersion 23 // Atur sesuai kebutuhan
+        targetSdkVersion flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
-        minSdkVersion flutter.minSdkVersion
-        minSdkVersion 23
     }
 
     buildTypes {
         release {
             // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
+            // Signing with the debug keys for now, so flutter run --release works.
             signingConfig = signingConfigs.debug
         }
     }
@@ -47,14 +42,14 @@ android {
         implementation platform('com.google.firebase:firebase-bom:32.2.0') // Sesuaikan dengan versi terbaru
         implementation 'com.google.firebase:firebase-auth'
         implementation 'com.google.firebase:firebase-messaging'
-        implementation 'androidx.core:core:1.12.0' // atau versi terbaru
+        implementation 'androidx.activity:activity:1.6.1' // Versi terbaru
+        implementation 'androidx.core:core-ktx:1.10.0'
+        implementation 'androidx.core:core:1.10.0' // Tambahkan ini
     }
-    // Dependencies lainnya
 
     configurations.all {
-        resolutionStrategy.force 'androidx.core:core:1.6.0'
+        resolutionStrategy.force 'androidx.core:core:1.10.0' // Update versi menjadi 1.10.0
     }
-
 }
 
 flutter {
@@ -63,4 +58,4 @@ flutter {
 
 apply plugin: 'com.android.application'
 // Tambahkan baris di bawah ini untuk menerapkan plugin Google Services.
-apply plugin: 'com.google.gms.google-services' // Google Services plugin
+apply plugin: 'com.google.gms.google-services' // Google Services plugin
