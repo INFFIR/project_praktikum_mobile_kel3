@@ -61,11 +61,11 @@ class AppPages {
       page: () => const SettingsPage(),
       // binding: SettingsBinding(),
     ),
-    //  GetPage(
-    //   name: Routes.rating,
-    //   page: () => const RatingView(),
-    //   binding: RatingBinding(),
-    // ),
+     GetPage(
+      name: Routes.location,
+      page: () => LocationView(),
+      binding: LocationBinding(),
+    ),
 
   ];
 }

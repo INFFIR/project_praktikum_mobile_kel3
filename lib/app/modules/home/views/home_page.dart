@@ -1,5 +1,3 @@
-// lib/pages/home_page.dart
-
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -14,39 +12,25 @@ import '../../product/widgets/product_card.dart'; // Ensure correct import if ne
 import 'home_admin_page.dart';
 import '../../services/notification_list_page.dart';
 
-class HomePage extends StatefulWidget {
+class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
-}
-
-class _HomePageState extends State<HomePage> {
-  final PromoController promoController = Get.put(PromoController());
-  final ProductController productController = Get.put(ProductController());
-  int _currentIndex = 0;
-
-  // Controller untuk input pencarian
-  final TextEditingController searchController = TextEditingController();
-
-  // State untuk speech-to-text
-  late stt.SpeechToText speechToText;
-  bool isListening = false;
-
-  @override
-  void initState() {
-    super.initState();
-    speechToText = stt.SpeechToText();
-  }
-
-  void onTabTapped(int index) {
-    setState(() {
-      _currentIndex = index;
-    });
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final PromoController promoController = Get.put(PromoController());
+    final ProductController productController = Get.put(ProductController());
+    final RxInt _currentIndex = 0.obs; // Menggunakan RxInt untuk state
+
+    // Controller untuk input pencarian
+    final TextEditingController searchController = TextEditingController();
+
+    // State untuk speech-to-text
+    late stt.SpeechToText speechToText;
+    bool isListening = false;
+
+    // Init speech-to-text
+    speechToText = stt.SpeechToText();
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -61,8 +45,6 @@ class _HomePageState extends State<HomePage> {
                 } else if (value == 'Settings') {
                   // Use named route to ensure bindings are applied
                   Get.toNamed(Routes.settings);
-                  // Alternatively, you can use:
-                  // Get.to(() => const SettingsPage(), binding: SettingsBinding());
                 }
               },
               itemBuilder: (BuildContext context) {
@@ -147,24 +129,18 @@ class _HomePageState extends State<HomePage> {
                           );
 
                           if (available) {
-                            setState(() {
-                              isListening = true;
-                            });
+                            isListening = true;
                             speechToText.listen(
                               onResult: (result) {
-                                setState(() {
-                                  searchController.text =
-                                      result.recognizedWords;
-                                  productController
-                                      .filterProducts(result.recognizedWords);
-                                });
+                                searchController.text =
+                                    result.recognizedWords;
+                                productController
+                                    .filterProducts(result.recognizedWords);
                               },
                             );
                           }
                         } else {
-                          setState(() {
-                            isListening = false;
-                          });
+                          isListening = false;
                           speechToText.stop();
                         }
                       } else {
@@ -248,8 +224,10 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
       bottomNavigationBar: BottomNavBar(
-        currentIndex: _currentIndex,
-        onTap: onTabTapped,
+        currentIndex: _currentIndex.value, // Gunakan .value untuk RxInt
+        onTap: (index) {
+          _currentIndex.value = index; // Update currentIndex dengan RxInt
+        },
       ),
     );
   }

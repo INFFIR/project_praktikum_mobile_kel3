@@ -22,16 +22,16 @@ class BottomNavBar extends StatelessWidget {
         // Navigasi menggunakan Get.toNamed
         switch (index) {
           case 0:
-            Get.toNamed('/home');
+            Get.offNamed('/home');
             break;
           case 1:
-            Get.toNamed('/home');
+            Get.offNamed('/home');
             break;
           case 2:
-            Get.toNamed('/rating');
+            Get.offNamed('/location');
             break;
           case 3:
-            Get.toNamed('/profile');
+            Get.offNamed('/profile');
             break;
         }
       },

@@ -83,7 +83,7 @@ class LoginPage extends StatelessWidget {
                   // Navigate to home page after login
                   controller.login().then((success) {
                     if (success) {
-                      Get.toNamed("/home"); // Use Get.to() for navigation
+                      Get.offAllNamed("/home"); // Use Get.to() for navigation
                     } else {
                       Get.snackbar(
                       'Login Failed',

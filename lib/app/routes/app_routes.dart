@@ -5,6 +5,6 @@ class Routes {
   static const home = '/home';
   static const detailProduct = '/detail_product';
   static const settings = '/settings'; // New route for SettingsPage
-  static const rating = '/rating';
+  static const location = '/location';
   // Add more route names here as needed
 }

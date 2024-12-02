@@ -3,12 +3,15 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../controllers/profile_controller.dart';
+import '../../components/bottom_navbar.dart';  // Import BottomNavBar
 
 class ProfileView extends GetView<ProfileController> {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final RxInt currentIndex = 3.obs; // Menambahkan RxInt untuk currentIndex
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: _buildAppBar(),
@@ -21,6 +24,14 @@ class ProfileView extends GetView<ProfileController> {
               ],
             ),
           )),
+      bottomNavigationBar: Obx(
+        () => BottomNavBar(
+          currentIndex: currentIndex.value, // Menggunakan .value untuk RxInt
+          onTap: (index) {
+            currentIndex.value = index; // Update currentIndex dengan RxInt
+          },
+        ),
+      ),
     );
   }
 

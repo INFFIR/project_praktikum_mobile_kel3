@@ -52,6 +52,8 @@ dependencies:
   geolocator: ^11.1.0 # untuk mengambil data lokasi GPS
   geocoding: ^3.0.0 # untuk konversi koordinat ke nama tempat
   url_launcher: ^6.0.12 # untuk membuka URL Google Maps
+  latlong2: ^0.9.1
+  flutter_map: ^7.0.2
 
 
 dev_dependencies:
