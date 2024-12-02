@@ -1,6 +1,7 @@
-import 'package:get/get.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:get/get.dart';
+import 'package:get/get_state_manager/src/simple/get_controllers.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class LocationController extends GetxController {
   var latitude = 0.0.obs;
@@ -57,5 +58,14 @@ class LocationController extends GetxController {
   void _stopLocationTracking() {
     // Anda bisa menambahkan logika untuk menghentikan stream lokasi
     // Namun, Geolocator otomatis menghentikan stream saat tidak digunakan
+  }
+
+  // Fungsi untuk mendapatkan lokasi saat ini
+  Future<void> getCurrentLocation() async {
+    Position position = await Geolocator.getCurrentPosition(
+      desiredAccuracy: LocationAccuracy.high,
+    );
+    latitude.value = position.latitude;
+    longitude.value = position.longitude;
   }
 }

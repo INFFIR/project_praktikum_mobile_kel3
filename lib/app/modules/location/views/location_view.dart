@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:flutter_map/flutter_map.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
+import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:latlong2/latlong.dart';
-import '../../components/bottom_navbar.dart';
-import '../controllers/location_controller.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/components/bottom_navbar.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/location/controllers/location_controller.dart';
 
 class LocationView extends GetView<LocationController> {
   final latitudeController = TextEditingController();
@@ -100,6 +102,15 @@ class LocationView extends GetView<LocationController> {
                 _buildSmoothButton(
                   label: "Open in Google Maps",
                   onPressed: controller.openGoogleMaps,
+                ),
+                const SizedBox(height: 16),
+                // Tombol untuk mendapatkan lokasi pengguna
+                _buildSmoothButton(
+                  label: "Get My Location",
+                  onPressed: () async {
+                    await controller.getCurrentLocation();
+                    _mapController.move(LatLng(controller.latitude.value, controller.longitude.value), 13.0);
+                  },
                 ),
                 const SizedBox(height: 16),
                 Obx(() => Text(
