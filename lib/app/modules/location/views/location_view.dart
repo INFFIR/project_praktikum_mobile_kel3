@@ -25,20 +25,6 @@ class LocationView extends GetView<LocationController> {
           style: TextStyle(color: Colors.white),
         ),
         backgroundColor: const Color.fromARGB(255, 45, 45, 45),
-        actions: [
-          // Tombol untuk menonaktifkan/aktifkan realtime detection
-          IconButton(
-            icon: Obx(() => Icon(
-              controller.isRealtimeDetectionEnabled.value
-                  ? Icons.location_off
-                  : Icons.location_on,
-              color: Colors.white,
-            )),
-            onPressed: () {
-              controller.toggleRealtimeDetection();
-            },
-          ),
-        ],
       ),
       body: SingleChildScrollView(
         child: Container(
@@ -68,55 +54,102 @@ class LocationView extends GetView<LocationController> {
                         urlTemplate: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
                         subdomains: ['a', 'b', 'c'],
                       ),
-                      TileLayer(
-                        urlTemplate: 'https://{s}.base.maps.api.here.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?app_id=YOUR_APP_ID&app_code=YOUR_APP_CODE',
-                        additionalOptions: {
-                          'app_id': 'vpSt10YxGQc4ytFdju0F',
-                          'app_code': 'eqsyvc_2P4sqLNV-ztXPVU4UizzrRb2xnLCZkMkfoCY',
-                        },
+                      // TileLayer(
+                      //   urlTemplate: 'https://{s}.base.maps.api.here.com/maptile/2.1/maptile/newest/normal.day/{z}/{x}/{y}/256/png8?app_id=YOUR_APP_ID&app_code=YOUR_APP_CODE',
+                      //   additionalOptions: {
+                      //     'app_id': 'vpSt10YxGQc4ytFdju0F',
+                      //     'app_code': 'eqsyvc_2P4sqLNV-ztXPVU4UizzrRb2xnLCZkMkfoCY',
+                      //   },
+                      // ), //intinya ini ga guna ga berfungsi aku gatau cara pakai api nya
+                                          Positioned(
+                      bottom: 16,
+                      right: 16,
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          // FAB untuk "Get My Location"
+                          FloatingActionButton(
+                            heroTag: 'getLocation',
+                            onPressed: () async {
+                              await controller.getCurrentLocation();
+                              _mapController.move(
+                                LatLng(controller.latitude.value, controller.longitude.value),
+                                17.0,
+                              );
+                            },
+                            backgroundColor: Colors.grey[850],
+                            child: const Icon(Icons.my_location, color: Colors.white),
+                          ),
+                          const SizedBox(height: 16),
+                          // FAB untuk "Lokasi Toko"
+                          FloatingActionButton(
+                            heroTag: 'lokasiToko',
+                            onPressed: () {
+                              const tokoLat = -7.952904000198055;
+                              const tokoLon = 112.63171099321725;
+                              _mapController.move(LatLng(tokoLat, tokoLon), 17.0);
+                            },
+                            backgroundColor: Colors.grey[850],
+                            child: const Icon(Icons.store, color: Colors.white),
+                          ),
+                        ],
                       ),
+                    ),
+
                     ],
                   ),
-                ),
-                const SizedBox(height: 16),
-                _buildSmoothTextField(
-                  controller: latitudeController,
-                  label: "Lintang",
-                ),
-                const SizedBox(height: 16),
-                _buildSmoothTextField(
-                  controller: longitudeController,
-                  label: "Bujur",
-                ),
-                const SizedBox(height: 16),
-                _buildSmoothButton(
-                  label: "Search Location",
-                  onPressed: () {
-                    final lat = double.tryParse(latitudeController.text) ?? 0.0;
-                    final lon = double.tryParse(longitudeController.text) ?? 0.0;
-                    controller.searchLocation(lat, lon);
-                    _mapController.move(LatLng(lat, lon), 13.0);
-                  },
-                ),
-                const SizedBox(height: 16),
-                _buildSmoothButton(
-                  label: "Open in Google Maps",
-                  onPressed: controller.openGoogleMaps,
-                ),
-                const SizedBox(height: 16),
-                // Tombol untuk mendapatkan lokasi pengguna
-                _buildSmoothButton(
-                  label: "Get My Location",
-                  onPressed: () async {
-                    await controller.getCurrentLocation();
-                    _mapController.move(LatLng(controller.latitude.value, controller.longitude.value), 13.0);
-                  },
                 ),
                 const SizedBox(height: 16),
                 Obx(() => Text(
                   "Lokasi Saat ini: Lintang ${controller.latitude}, Bujur ${controller.longitude}",
                   style: const TextStyle(color: Color.fromARGB(255, 0, 0, 0)),
                 )),
+                const SizedBox(height: 16),
+                // Menampilkan TextField dan tombol search secara horizontal dengan jarak yang seimbang
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: _buildSmoothTextField(
+                        controller: latitudeController,
+                        label: "Lintang",
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildSmoothTextField(
+                        controller: longitudeController,
+                        label: "Bujur",
+                      ),
+                    ),
+                    const SizedBox(width: 16), // Jarak pemisah yang sama seperti Lintang dan Bujur
+                    Container(
+                      height: 36,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[850], // Latar belakang tombol
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: IconButton(
+                        icon: const Icon(Icons.search, color: Colors.white),
+                        onPressed: () {
+                          final lat = double.tryParse(latitudeController.text) ?? 0.0;
+                          final lon = double.tryParse(longitudeController.text) ?? 0.0;
+                          controller.searchLocation(lat, lon);
+                          _mapController.move(LatLng(lat, lon), 17.0);
+                        },
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(),
+                        iconSize: 30,
+                      ),
+                    )
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildSmoothButton(
+                  label: "Open in Google Maps",
+                  onPressed: controller.openGoogleMaps,
+                ),
+
               ],
             ),
           ),
@@ -137,24 +170,27 @@ class LocationView extends GetView<LocationController> {
     required TextEditingController controller,
     required String label,
   }) {
-    return TextField(
-      controller: controller,
-      style: const TextStyle(color: Colors.white),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: const TextStyle(color: Colors.white),
-        enabledBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.black),
-          borderRadius: BorderRadius.circular(8),
+      return SizedBox(
+        height: 35, // Terapkan height jika diberikan
+        child: TextField(
+        controller: controller,
+        style: const TextStyle(color: Colors.white),
+        decoration: InputDecoration(
+          labelText: label,
+          labelStyle: const TextStyle(color: Colors.white),
+          enabledBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.black),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderSide: const BorderSide(color: Colors.black),
+            borderRadius: BorderRadius.circular(8),
+          ),
+          filled: true,
+          fillColor: Colors.grey[800],
         ),
-        focusedBorder: OutlineInputBorder(
-          borderSide: const BorderSide(color: Colors.black),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        filled: true,
-        fillColor: Colors.grey[800],
+        keyboardType: TextInputType.number,
       ),
-      keyboardType: TextInputType.number,
     );
   }
 
