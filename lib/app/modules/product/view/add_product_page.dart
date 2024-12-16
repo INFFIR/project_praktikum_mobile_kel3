@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_admin_page.dart';
 import '../../product/controllers/product_controller.dart';
 import 'dart:io';
 
@@ -113,7 +114,8 @@ class _AddProductPageState extends State<AddProductPage> {
                       backgroundColor: Colors.green.withOpacity(0.5),
                       colorText: Colors.white,
                     );
-                    Get.back();
+                    // Ganti `ProductListPage` dengan halaman tujuan Anda
+                    Get.off(() => HomeAdminPage());
                   } catch (e) {
                     Get.snackbar(
                       "Error",
@@ -133,3 +135,5 @@ class _AddProductPageState extends State<AddProductPage> {
     );
   }
 }
+
+// Pastikan Anda memiliki halaman ProductListPage atau ganti dengan halaman yang sesuai

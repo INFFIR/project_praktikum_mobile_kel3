@@ -1,3 +1,4 @@
+// lib/app/modules/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -11,12 +12,18 @@ import '../../product/widgets/promo_card.dart';
 import '../../product/widgets/product_card.dart'; // Pastikan impor benar
 import 'home_admin_page.dart';
 import '../../services/notification_list_page.dart';
+import '../../services/connectivity_service.dart'; // Import ConnectivityService
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Inisialisasi ConnectivityService jika belum diinisialisasi
+    if (!Get.isRegistered<ConnectivityService>()) {
+      Get.put(ConnectivityService());
+    }
+
     final PromoController promoController = Get.put(PromoController());
     final ProductController productController = Get.put(ProductController());
     final RxInt _currentIndex = 0.obs; // Menggunakan RxInt untuk state
@@ -25,11 +32,8 @@ class HomePage extends StatelessWidget {
     final TextEditingController searchController = TextEditingController();
 
     // State untuk speech-to-text
-    late stt.SpeechToText speechToText;
-    bool isListening = false;
-
-    // Init speech-to-text
-    speechToText = stt.SpeechToText();
+    final stt.SpeechToText speechToText = stt.SpeechToText();
+    final RxBool isListening = false.obs;
 
     return Scaffold(
       appBar: AppBar(
@@ -112,67 +116,67 @@ class HomePage extends StatelessWidget {
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: TextField(
-                  controller: searchController,
-                  onChanged: (value) {
-                    productController.filterProducts(value);
-                  },
-                  decoration: InputDecoration(
-                    prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        isListening ? Icons.mic : Icons.mic_none,
-                        color: isListening ? Colors.red : Colors.grey,
-                      ),
-                      onPressed: () async {
-                        if (await Permission.microphone.request().isGranted) {
-                          if (!isListening) {
-                            bool available = await speechToText.initialize(
-                              onStatus: (status) {
-                                print('SpeechToText Status: $status');
-                              },
-                              onError: (error) {
-                                print('SpeechToText Error: ${error.errorMsg}');
-                              },
-                            );
+                child: Obx(() => TextField(
+                      controller: searchController,
+                      onChanged: (value) {
+                        productController.filterProducts(value);
+                      },
+                      decoration: InputDecoration(
+                        prefixIcon: const Icon(Icons.search, color: Colors.grey),
+                        suffixIcon: IconButton(
+                          icon: Icon(
+                            isListening.value ? Icons.mic : Icons.mic_none,
+                            color: isListening.value ? Colors.red : Colors.grey,
+                          ),
+                          onPressed: () async {
+                            if (await Permission.microphone.request().isGranted) {
+                              if (!isListening.value) {
+                                bool available = await speechToText.initialize(
+                                  onStatus: (status) {
+                                    print('SpeechToText Status: $status');
+                                  },
+                                  onError: (error) {
+                                    print('SpeechToText Error: ${error.errorMsg}');
+                                  },
+                                );
 
-                            if (available) {
-                              isListening = true;
-                              speechToText.listen(
-                                onResult: (result) {
-                                  searchController.text =
-                                      result.recognizedWords;
-                                  productController
-                                      .filterProducts(result.recognizedWords);
-                                },
+                                if (available) {
+                                  isListening.value = true;
+                                  speechToText.listen(
+                                    onResult: (result) {
+                                      searchController.text =
+                                          result.recognizedWords;
+                                      productController
+                                          .filterProducts(result.recognizedWords);
+                                    },
+                                  );
+                                }
+                              } else {
+                                isListening.value = false;
+                                speechToText.stop();
+                              }
+                            } else {
+                              Get.snackbar(
+                                'Permission Denied',
+                                'Microphone permission is required to use voice search.',
                               );
                             }
-                          } else {
-                            isListening = false;
-                            speechToText.stop();
-                          }
-                        } else {
-                          Get.snackbar(
-                            'Permission Denied',
-                            'Microphone permission is required to use voice search.',
-                          );
-                        }
-                      },
-                    ),
-                    hintText: 'Search',
-                    hintStyle: const TextStyle(color: Colors.grey),
-                    filled: true,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.black),
-                    ),
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.black),
-                    ),
-                  ),
-                ),
+                          },
+                        ),
+                        hintText: 'Search',
+                        hintStyle: const TextStyle(color: Colors.grey),
+                        filled: true,
+                        fillColor: const Color.fromARGB(255, 255, 255, 255),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8),
+                          borderSide: const BorderSide(color: Colors.black),
+                        ),
+                      ),
+                    )),
               ),
 
               const Padding(

@@ -11,6 +11,7 @@ import '../../product/widgets/admin_product_card.dart';
 import '../../product/widgets/admin_promo_card.dart';
 import '../../services/notification_list_page.dart';
 import '../../services/notification_service.dart';
+import '../../services/connectivity_service.dart'; // Import ConnectivityService
 
 class HomeAdminPage extends StatefulWidget {
   const HomeAdminPage({super.key});
@@ -27,8 +28,10 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
   @override
   void initState() {
     super.initState();
-    // Pastikan aplikasi siap menerima notifikasi dalam semua kondisi
+    // Inisialisasi layanan notifikasi
     notificationService.init();
+    // Inisialisasi layanan konektivitas
+    Get.put(ConnectivityService());
   }
 
   void _addNewProduct() {
@@ -99,7 +102,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   ],
                 ),
               ),
-              // Product Management Section
+              // Bagian Manajemen Produk
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Align(
@@ -117,7 +120,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   ),
                 ),
               ),
-              // Product GridView
+              // GridView Produk
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Obx(
@@ -140,7 +143,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                         name: product['name'] ?? 'Nama Produk',
                         price: 'Rp ${product['price'] ?? 0}',
                         onEdit: () {
-                          // Navigate to Edit Product Page
+                          // Navigasi ke Halaman Edit Produk
                           Get.to(
                               () => EditProductPage(productId: product['id']));
                         },
@@ -173,7 +176,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   ),
                 ),
               ),
-              // Promotion Management Section
+              // Bagian Manajemen Promo
               const Padding(
                 padding: EdgeInsets.symmetric(vertical: 16.0),
                 child: Align(
@@ -191,7 +194,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                   ),
                 ),
               ),
-              // Promotion GridView
+              // GridView Promo
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16.0),
                 child: Obx(

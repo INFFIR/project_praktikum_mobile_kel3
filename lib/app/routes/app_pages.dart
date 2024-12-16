@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/bindings/home_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_admin_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
@@ -65,6 +66,10 @@ class AppPages {
       name: Routes.location,
       page: () => LocationView(),
       binding: LocationBinding(),
+    ),
+      GetPage(
+      name: Routes.admin,
+      page: () => HomeAdminPage(),
     ),
 
   ];

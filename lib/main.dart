@@ -1,45 +1,60 @@
+// main.dart
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'package:get_storage/get_storage.dart'; // Tambahkan ini untuk GetStorage
+import 'package:get_storage/get_storage.dart';
 import 'app/modules/audio_manager/audio_manager.dart';
-import 'app/routes/app_pages.dart';
+import 'app/modules/product/controllers/product_controller.dart';
+import 'app/modules/product/controllers/promo_controller.dart';
+import 'app/modules/services/connectivity_service.dart';
 import 'app/modules/services/notification_service.dart';
+import 'app/routes/app_pages.dart';
 
-/// Handler untuk pesan background FCM
+/// Handler for background FCM messages
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
-  print('Menangani pesan background: ${message.messageId}');
-  // Simpan notifikasi ke Firestore jika diperlukan
+  print('Handling background message: ${message.messageId}');
 }
 
-void main() async {
+Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inisialisasi Firebase
+  // Initialize Firebase
   await Firebase.initializeApp();
 
-  // Inisialisasi GetStorage
+  // Initialize GetStorage
   await GetStorage.init();
+  // Get.put<ProductController>(ProductController());
+  // Get.put<PromoController>(PromoController()); 
 
-  // Mengatur handler untuk pesan background FCM
+  // Set up background message handler
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);
 
-  // Inisialisasi NotificationService
+  // Initialize ConnectivityService asynchronously
+  if (!Get.isRegistered<ConnectivityService>()) {
+    await Get.putAsync<ConnectivityService>(() async {
+      final connectivityService = ConnectivityService();
+      await connectivityService.initialize(); 
+      return connectivityService;
+    });
+  }
+
+  // Initialize NotificationService asynchronously
   if (!Get.isRegistered<NotificationService>()) {
     await Get.putAsync<NotificationService>(() async {
       final notificationService = NotificationService();
-      await notificationService.init();
+      await notificationService.init(); 
       return notificationService;
     });
   }
 
-  // Inisialisasi AudioManager sebagai singleton
+  // Initialize AudioManager as a singleton
   if (!Get.isRegistered<AudioManager>()) {
     Get.put<AudioManager>(AudioManager(), permanent: true);
   }
 
+  // Run the app
   runApp(const MyApp());
 }
 
@@ -56,7 +71,6 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      // home: const WelcomePage(), // Sudah ditentukan di initialRoute
     );
   }
 }
