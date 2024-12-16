@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../controllers/detail_product_controller.dart';
-import '../widget/video_player.dart';
 import 'detail_person_review.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
 
@@ -17,7 +16,8 @@ class DetailProductPage extends StatefulWidget {
 class _DetailProductPageState extends State<DetailProductPage> {
   final DetailProductController controller = Get.find();
 
-  void _addReview(double rating, String reviewer, String comment, File? image, File? video) {
+  void _addReview(double rating, String reviewer, String comment, File? image,
+      File? video) {
     controller.addReview(rating, reviewer, comment, image, video);
   }
 
@@ -28,7 +28,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
     File? selectedVideo;
 
     Future<void> _pickImage() async {
-      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
+      final pickedFile =
+          await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
           selectedImage = File(pickedFile.path);
@@ -37,7 +38,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
     }
 
     Future<void> _pickVideo() async {
-      final pickedFile = await ImagePicker().pickVideo(source: ImageSource.camera);
+      final pickedFile =
+          await ImagePicker().pickVideo(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
           selectedVideo = File(pickedFile.path);
@@ -85,7 +87,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
                         direction: Axis.horizontal,
                         allowHalfRating: true,
                         itemCount: 5,
-                        itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        itemPadding:
+                            const EdgeInsets.symmetric(horizontal: 4.0),
                         itemBuilder: (context, _) => const Icon(
                           Icons.star,
                           color: Colors.amber,
@@ -120,7 +123,9 @@ class _DetailProductPageState extends State<DetailProductPage> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  controller.isListening.value ? Icons.mic_off : Icons.mic,
+                                  controller.isListening.value
+                                      ? Icons.mic_off
+                                      : Icons.mic,
                                 ),
                                 onPressed: () {
                                   controller.toggleListening();
@@ -172,14 +177,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
     );
   }
 
-  Widget _buildReview(
-      double rating,
-      String reviewer,
-      String date,
-      String comment,
-      File? image,
-      File? video,
-      BuildContext context) {
+  Widget _buildReview(double rating, String reviewer, String date,
+      String comment, File? image, File? video, BuildContext context) {
     return GestureDetector(
       onTap: () {
         Navigator.push(
@@ -291,7 +290,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
               ),
             ),
             const SizedBox(height: 8),
-            const Text('White', style: TextStyle(color: Colors.grey, fontSize: 18)),
+            const Text('White',
+                style: TextStyle(color: Colors.grey, fontSize: 18)),
             const SizedBox(height: 8),
             const Text(
               'Rp.330.000,-',

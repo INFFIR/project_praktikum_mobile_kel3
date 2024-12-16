@@ -1,8 +1,8 @@
-// main.dart
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:get_storage/get_storage.dart'; // Tambahkan ini untuk GetStorage
 import 'app/modules/audio_manager/audio_manager.dart';
 import 'app/routes/app_pages.dart';
 import 'app/modules/services/notification_service.dart';
@@ -16,7 +16,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Inisialisasi Firebase
   await Firebase.initializeApp();
+
+  // Inisialisasi GetStorage
+  await GetStorage.init();
 
   // Mengatur handler untuk pesan background FCM
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

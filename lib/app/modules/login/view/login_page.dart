@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../controllers/login_controller.dart';
 
 class LoginPage extends StatelessWidget {
@@ -19,8 +20,7 @@ class LoginPage extends StatelessWidget {
         actions: [
           TextButton(
             onPressed: () {
-              // Navigate to sign up screen
-              Get.toNamed("/sign_up"); // Use Get.to() for navigation
+              Get.toNamed("/sign_up"); // Navigasi ke halaman sign up
             },
             child: const Text(
               'Sign Up',
@@ -79,20 +79,27 @@ class LoginPage extends StatelessWidget {
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  // Navigate to home page after login
-                  controller.login().then((success) {
-                    if (success) {
-                      Get.offAllNamed("/home"); // Use Get.to() for navigation
-                    } else {
-                      Get.snackbar(
+                onPressed: () async {
+                  // Cek konektivitas terlebih dahulu
+                  final connectivityResult =
+                      await Connectivity().checkConnectivity();
+
+                  if (connectivityResult != ConnectivityResult.none) {
+                    // Sinkronisasi data lokal jika aplikasi online
+                    await controller.syncLocalData();
+                  }
+
+                  // Lakukan proses login
+                  final success = await controller.login();
+                  if (success) {
+                    Get.offAllNamed("/home"); // Navigasi ke halaman utama
+                  } else {
+                    Get.snackbar(
                       'Login Failed',
                       'Please check your email and password.',
                       snackPosition: SnackPosition.BOTTOM,
-
-                      );
-                    }
-                  });
+                    );
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -109,15 +116,6 @@ class LoginPage extends StatelessWidget {
                 ),
               ),
             ),
-            const Spacer(),
-            Center(
-              
-              child: Image.asset(
-                'assets/google.png',
-                height: 30,
-              ),
-            ),
-            const SizedBox(height: 350),
           ],
         ),
       ),
