@@ -28,6 +28,13 @@ class _AddProductPageState extends State<AddProductPage> {
       });
     } catch (e) {
       print("Error picking image: $e");
+      Get.snackbar(
+        "Error",
+        "Terjadi kesalahan saat memilih gambar.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -80,12 +87,42 @@ class _AddProductPageState extends State<AddProductPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  await productController.addProduct(
-                    name: nameController.text,
-                    price: priceController.text,
-                    imageFile: _image,
-                  );
-                  Get.back();
+                  // Validasi Input
+                  if (nameController.text.trim().isEmpty ||
+                      priceController.text.trim().isEmpty) {
+                    Get.snackbar(
+                      "Error",
+                      "Nama dan harga produk tidak boleh kosong.",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  try {
+                    await productController.addProduct(
+                      name: nameController.text.trim(),
+                      price: priceController.text.trim(),
+                      imageFile: _image,
+                    );
+                    Get.snackbar(
+                      "Berhasil",
+                      "Produk Ditambahkan",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                    Get.back();
+                  } catch (e) {
+                    Get.snackbar(
+                      "Error",
+                      e.toString(),
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                  }
                 },
                 child: const Text('Simpan'),
               ),
