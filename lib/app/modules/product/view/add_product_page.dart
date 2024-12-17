@@ -1,6 +1,9 @@
+// lib/app/views/add_product_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_admin_page.dart';
 import '../../product/controllers/product_controller.dart';
 import 'dart:io';
 
@@ -12,7 +15,7 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  final ProductController productController = Get.find();
+  final ProductController productController = Get.find<ProductController>();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -113,7 +116,7 @@ class _AddProductPageState extends State<AddProductPage> {
                       backgroundColor: Colors.green.withOpacity(0.5),
                       colorText: Colors.white,
                     );
-                    Get.back();
+                    Get.off(() => const HomeAdminPage());
                   } catch (e) {
                     Get.snackbar(
                       "Error",
