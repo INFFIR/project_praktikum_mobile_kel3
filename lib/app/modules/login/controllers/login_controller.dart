@@ -47,7 +47,7 @@ class LoginController extends GetxController {
     );
   }
 
-  // Proses login menggunakan Firebase Authentication
+// Proses login menggunakan Firebase Authentication
   Future<bool> processLogin(String email, String password) async {
     try {
       // Login menggunakan Firebase Authentication
@@ -60,6 +60,9 @@ class LoginController extends GetxController {
       User? user = userCredential.user;
       if (user != null) {
         print('Logged in user: ${user.email} with UID: ${user.uid}');
+
+        // Simpan UID ke GetStorage
+        await storage.write('uid', user.uid);
       }
 
       // Simpan data login ke Firestore

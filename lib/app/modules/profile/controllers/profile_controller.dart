@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -8,6 +10,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:url_launcher/url_launcher.dart'; // Tambahkan untuk membuka URL
+import 'package:connectivity_plus/connectivity_plus.dart';
 
 class ProfileController extends GetxController {
   final box = GetStorage();
@@ -35,6 +38,12 @@ class ProfileController extends GetxController {
   void onInit() {
     super.onInit();
     loadUserData();
+    // Mulai pengecekan sinkronisasi data secara periodik
+    Timer.periodic(Duration(seconds: 10), (timer) {
+      syncPendingData(); // Cek dan sinkronkan data jika perlu
+    });
+
+    loadUserData();
   }
 
   @override
@@ -44,6 +53,11 @@ class ProfileController extends GetxController {
     passwordController.dispose();
     addressController.dispose();
     super.onClose();
+  }
+
+  Future<bool> isOnline() async {
+    var connectivityResult = await Connectivity().checkConnectivity();
+    return connectivityResult != ConnectivityResult.none;
   }
 
   // Fungsi untuk load data user dari GetStorage
@@ -91,11 +105,56 @@ class ProfileController extends GetxController {
     }
   }
 
+  void syncPendingData() async {
+    try {
+      bool online = await isOnline(); // Mengecek koneksi internet
+      if (online) {
+        bool? pendingUpdate = box.read('pendingProfileUpdate');
+        if (pendingUpdate == true) {
+          // Lakukan sinkronisasi data ke Firebase
+          await saveAddressToFirebase(addressController.text);
+
+          // Setel ulang tanda pembaruan di local storage
+          await box.remove('pendingProfileUpdate');
+          Get.snackbar('Info', 'Data berhasil disinkronkan dengan Firebase');
+        }
+      }
+    } catch (e) {
+      print('Error syncing data: $e');
+    }
+  }
+
+// Fungsi untuk memuat data profil berdasarkan UID
+  Future<void> loadProfileData() async {
+    try {
+      final uid = box.read('uid'); // Ambil UID user dari storage
+      if (uid != null) {
+        // Ambil data pengguna dari Firestore berdasarkan UID
+        DocumentSnapshot userDoc =
+            await FirebaseFirestore.instance.collection('users').doc(uid).get();
+        if (userDoc.exists) {
+          // Menampilkan data pengguna
+          usernameController.text = userDoc['username'] ?? '';
+          emailController.text = userDoc['email'] ?? '';
+          addressController.text = userDoc['address'] ?? '';
+        } else {
+          Get.snackbar('Error', 'User data not found');
+        }
+      } else {
+        Get.snackbar('Error', 'UID not found');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to load user data');
+      print('Error loading profile data: $e');
+    }
+  }
+
   // Fungsi untuk memperbarui data profil
   Future<void> updateProfile() async {
     try {
       isLoading.value = true;
 
+      // Simpan data ke local storage
       await box.write('username', usernameController.text);
       await box.write('userEmail', emailController.text);
 
@@ -103,10 +162,18 @@ class ProfileController extends GetxController {
         await box.write('userPassword', passwordController.text);
       }
 
-      // Update alamat yang ada di addressController
-      await saveAddressToFirebase(addressController.text);
+      // Cek apakah ada koneksi internet
+      bool online = await isOnline();
 
-      Get.snackbar('Success', 'Profil berhasil diperbarui');
+      if (online) {
+        // Jika ada koneksi, update ke Firebase
+        await saveAddressToFirebase(addressController.text);
+        Get.snackbar('Success', 'Profil berhasil diperbarui');
+      } else {
+        // Jika tidak ada koneksi, simpan data di local storage dan antri untuk sinkronisasi nanti
+        await box.write('pendingProfileUpdate', true); // Tandai ada pembaruan
+        Get.snackbar('Info', 'Tidak ada koneksi, data disimpan sementara');
+      }
     } catch (e) {
       Get.snackbar('Error', 'Gagal memperbarui profil');
       print('Error updating profile: $e');
@@ -201,7 +268,7 @@ class ProfileController extends GetxController {
       // Set the new address to the currentAddress observable
       currentAddress.value = newAddress;
 
-      // Optionally, update the address in Firebase if needed
+      // Simpan alamat ke Firebase
       await saveAddressToFirebase(newAddress);
 
       Get.snackbar('Success', 'Alamat berhasil diperbarui');
@@ -211,20 +278,23 @@ class ProfileController extends GetxController {
     }
   }
 
-  // Simpan alamat ke Firebase
+// Simpan alamat ke Firebase
   Future<void> saveAddressToFirebase(String address) async {
     try {
       final uid = box.read('uid'); // Ambil UID user dari storage
       if (uid != null) {
-        await FirebaseFirestore.instance
-            .collection('users')
-            .doc(uid)
-            .update({'address': address});
-        Get.snackbar('Success', 'Alamat berhasil diperbarui');
+        // Simpan data ke Firestore berdasarkan UID
+        await FirebaseFirestore.instance.collection('users').doc(uid).update({
+          'address': address, // Menyimpan alamat
+          'username': usernameController.text, // Menyimpan username
+        });
+        Get.snackbar('Success', 'Alamat dan username berhasil diperbarui');
+      } else {
+        Get.snackbar('Error', 'UID pengguna tidak ditemukan');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Gagal menyimpan alamat');
-      print('Error saving address: $e');
+      Get.snackbar('Error', 'Gagal menyimpan alamat dan username');
+      print('Error saving address and username: $e');
     }
   }
 }
