@@ -7,9 +7,9 @@ class ProductController extends GetxController {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
 
-  final products = <Map<String, dynamic>>[].obs;
+  final products = <Map<String, dynamic>>[].obs; // Produk yang diambil dari Firestore
   final filteredProducts = <Map<String, dynamic>>[].obs; // Produk hasil filter
-  final isFavorited = <RxBool>[].obs;
+  final isFavorited = <RxBool>[].obs; // Status favorit untuk setiap produk
 
   @override
   void onInit() {
@@ -17,29 +17,33 @@ class ProductController extends GetxController {
     fetchProducts();
   }
 
+  // Fungsi untuk mengambil data produk dari Firestore
   void fetchProducts() {
     firestore.collection('products').snapshots().listen((snapshot) {
+      // Menyimpan produk ke dalam 'products'
       products.value = snapshot.docs.map((doc) {
         var data = doc.data();
-        data['id'] = doc.id;
+        data['id'] = doc.id; // Menambahkan id produk
         return data;
       }).toList();
 
-      // Sinkronisasi produk terfilter dengan semua produk
+      // Menginisialisasi filteredProducts dengan semua produk
       filteredProducts.assignAll(products);
 
-      // Inisialisasi status favorit
+      // Menginisialisasi status favorit
       isFavorited.assignAll(
         List<RxBool>.generate(products.length, (_) => false.obs),
       );
     });
   }
 
-  // Fungsi untuk memfilter produk berdasarkan pencarian (teks atau suara)
+  // Fungsi untuk memfilter produk berdasarkan pencarian
   void filterProducts(String query) {
     final cleanedQuery = query.trim().toLowerCase();
+
+    // Cek apakah query kosong
     if (cleanedQuery.isEmpty) {
-      filteredProducts.assignAll(products);
+      filteredProducts.assignAll(products); // Tampilkan semua produk
     } else {
       filteredProducts.assignAll(
         products.where((product) {
@@ -48,9 +52,11 @@ class ProductController extends GetxController {
         }).toList(),
       );
     }
+
     print('Filtered Products: ${filteredProducts.length} items found.');
   }
 
+  // Fungsi untuk menambahkan produk baru
   Future<void> addProduct({
     required String name,
     required String price,
@@ -75,10 +81,12 @@ class ProductController extends GetxController {
     });
   }
 
+  // Fungsi untuk menghapus produk
   Future<void> deleteProduct(String productId) async {
     await firestore.collection('products').doc(productId).delete();
   }
 
+  // Fungsi untuk mengedit produk
   Future<void> editProduct(
     String productId, {
     required String name,
@@ -105,6 +113,7 @@ class ProductController extends GetxController {
     await firestore.collection('products').doc(productId).update(updatedData);
   }
 
+  // Fungsi untuk meng-upload gambar produk ke Firebase Storage
   Future<String> _uploadImageToStorage(File imageFile, String folder) async {
     Reference storageReference = storage.ref().child(
         '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
@@ -114,6 +123,7 @@ class ProductController extends GetxController {
     return imageUrl;
   }
 
+  // Fungsi untuk men-toggle status favorit produk
   void toggleFavorite(int index, String userId) async {
     final productId = products[index]['id'];
     final favRef = firestore
@@ -139,7 +149,7 @@ class ProductController extends GetxController {
     });
   }
 
-  // Fungsi untuk mereset hasil pencarian
+  // Fungsi untuk mereset pencarian dan menampilkan semua produk
   void resetSearch() {
     filteredProducts.assignAll(products);
   }

@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:get_storage/get_storage.dart'; // Tambahkan ini untuk GetStorage
 import 'app/modules/audio_manager/audio_manager.dart';
+import 'app/modules/services/connectivity_service.dart';
 import 'app/routes/app_pages.dart';
 import 'app/modules/services/notification_service.dart';
 
@@ -22,6 +23,7 @@ void main() async {
 
   // Inisialisasi GetStorage
   await GetStorage.init();
+  Get.lazyPut(() => ConnectivityService());
 
   // Mengatur handler untuk pesan background FCM
   FirebaseMessaging.onBackgroundMessage(_firebaseMessagingBackgroundHandler);

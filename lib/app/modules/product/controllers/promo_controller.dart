@@ -1,10 +1,12 @@
-// lib/app/product/controllers/promo_controller.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:async';
 import 'dart:io';
+import 'package:get_storage/get_storage.dart';
+import '../../services/connectivity_service.dart';
+
 
 class PromoItem {
   String? id;
@@ -32,6 +34,8 @@ class PromoController extends GetxController {
   late PageController pageController;
   Timer? timer;
 
+  final ConnectivityService _connectivityService = Get.find();
+
   @override
   void onInit() {
     super.onInit();
@@ -56,7 +60,7 @@ class PromoController extends GetxController {
     firestore.collection('promos').snapshots().listen((snapshot) {
       promoItems.value = snapshot.docs.map((doc) {
         var data = doc.data();
-        data['id'] = doc.id; // Menyimpan ID dokumen
+        data['id'] = doc.id;
         return PromoItem(
           id: data['id'],
           imageUrl: data['imageUrl'] ?? '',
@@ -83,27 +87,61 @@ class PromoController extends GetxController {
       imageUrl = await _uploadImageToStorage(imageFile, 'promo_images');
     }
 
-    // Simpan data promo ke Firestore
-    DocumentReference docRef = await firestore.collection('promos').add({
-      'imageUrl': imageUrl,
-      'titleText': promoItem.titleText,
-      'contentText': promoItem.contentText,
-      'promoLabelText': promoItem.promoLabelText,
-      'promoDescriptionText': promoItem.promoDescriptionText,
-    });
+    if (await _connectivityService.checkConnection()) {
+      DocumentReference docRef = await firestore.collection('promos').add({
+        'imageUrl': imageUrl,
+        'titleText': promoItem.titleText,
+        'contentText': promoItem.contentText,
+        'promoLabelText': promoItem.promoLabelText,
+        'promoDescriptionText': promoItem.promoDescriptionText,
+      });
 
-    // Perbarui promoItem dengan ID dokumen yang baru dibuat
-    promoItem.id = docRef.id;
-
-    // Tambahkan promo ke list lokal jika diperlukan
-    promoItems.add(promoItem);
-
-    // Kirim notifikasi jika diperlukan
-    // Implementasi pengiriman notifikasi menggunakan FCM
+      promoItem.id = docRef.id;
+      promoItems.add(promoItem);
+      Get.snackbar("Success", "Promo added successfully.");
+    } else {
+      // Save promo data locally if no connection
+      final box = GetStorage();
+      box.write('pendingPromo', {
+        'imageUrl': imageUrl,
+        'titleText': promoItem.titleText,
+        'contentText': promoItem.contentText,
+        'promoLabelText': promoItem.promoLabelText,
+        'promoDescriptionText': promoItem.promoDescriptionText,
+      });
+      Get.snackbar("Offline", "Promo saved locally, will upload when connected.");
+    }
   }
 
-  Future<void> editPromo(
-      String promoId, PromoItem promoItem, File? imageFile) async {
+  Future<void> uploadPendingPromo() async {
+    final box = GetStorage();
+    if (box.hasData('pendingPromo')) {
+      var pendingPromo = box.read('pendingPromo');
+      DocumentReference docRef = await firestore.collection('promos').add(pendingPromo);
+      String promoId = docRef.id;
+      promoItems.add(PromoItem(
+        id: promoId,
+        imageUrl: pendingPromo['imageUrl'],
+        titleText: pendingPromo['titleText'],
+        contentText: pendingPromo['contentText'],
+        promoLabelText: pendingPromo['promoLabelText'],
+        promoDescriptionText: pendingPromo['promoDescriptionText'],
+      ));
+      box.remove('pendingPromo');
+      Get.snackbar("Uploaded", "Promo uploaded successfully.");
+    }
+  }
+
+  Future<String> _uploadImageToStorage(File imageFile, String folder) async {
+    Reference storageReference = storage.ref().child(
+        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
+    UploadTask uploadTask = storageReference.putFile(imageFile);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    String imageUrl = await taskSnapshot.ref.getDownloadURL();
+    return imageUrl;
+  }
+
+  Future<void> editPromo(String promoId, PromoItem promoItem, File? imageFile) async {
     String? imageUrl;
     if (imageFile != null) {
       imageUrl = await _uploadImageToStorage(imageFile, 'promo_images');
@@ -122,7 +160,7 @@ class PromoController extends GetxController {
 
     await firestore.collection('promos').doc(promoId).update(updatedData);
 
-    // Perbarui item di list lokal jika diperlukan
+    // Update the local list
     int index = promoItems.indexWhere((item) => item.id == promoId);
     if (index != -1) {
       promoItems[index] = PromoItem(
@@ -135,25 +173,12 @@ class PromoController extends GetxController {
       );
     }
 
-    // Kirim notifikasi jika diperlukan
+    Get.snackbar("Success", "Promo updated successfully.");
   }
 
   Future<void> deletePromo(String promoId) async {
     await firestore.collection('promos').doc(promoId).delete();
-
-    // Hapus item dari list lokal jika diperlukan
     promoItems.removeWhere((item) => item.id == promoId);
-
-    // Hapus gambar dari Firebase Storage jika diperlukan
-    // Anda perlu menyimpan referensi ke path gambar untuk menghapusnya
-  }
-
-  Future<String> _uploadImageToStorage(File imageFile, String folder) async {
-    Reference storageReference = storage.ref().child(
-        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
-    UploadTask uploadTask = storageReference.putFile(imageFile);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    String imageUrl = await taskSnapshot.ref.getDownloadURL();
-    return imageUrl;
+    Get.snackbar("Success", "Promo deleted successfully.");
   }
 }

@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_admin_page.dart';
 
 import 'dart:io';
 
@@ -133,7 +134,7 @@ class _AddPromoPageState extends State<AddPromoPage> {
                   );
 
                   // Kembali ke halaman sebelumnya
-                  Get.back();
+                  Get.off(()=>const HomeAdminPage());
                 },
                 child: const Text('Simpan'),
               ),
