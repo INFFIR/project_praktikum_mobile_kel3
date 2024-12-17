@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 
 class ProductCard extends StatelessWidget {
   final String imageUrl;
   final String name;
   final String price;
-  final RxInt likes;
-  final RxBool isFavorited;
+  final int likes;
+  final bool isFavorited;
   final VoidCallback onFavoriteToggle;
   final VoidCallback onTap;
 
@@ -68,20 +67,18 @@ class ProductCard extends StatelessWidget {
                     price.isNotEmpty ? price : 'Harga Tidak Tersedia',
                     style: const TextStyle(fontSize: 14),
                   ),
-                  Obx(
-                    () => Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        IconButton(
-                          icon: Icon(
-                            isFavorited.value ? Icons.favorite : Icons.favorite_border,
-                            color: isFavorited.value ? Colors.red : null,
-                          ),
-                          onPressed: onFavoriteToggle,
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      IconButton(
+                        icon: Icon(
+                          isFavorited ? Icons.favorite : Icons.favorite_border,
+                          color: isFavorited ? Colors.red : null,
                         ),
-                        Text('${likes.value}'),
-                      ],
-                    ),
+                        onPressed: onFavoriteToggle,
+                      ),
+                      Text('$likes'),
+                    ],
                   ),
                 ],
               ),

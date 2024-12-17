@@ -29,21 +29,41 @@ class _EditProductPageState extends State<EditProductPage> {
     fetchProductData();
   }
 
-void fetchProductData() async {
-  var doc = await productController.firestore
-      .collection('products')
-      .doc(widget.productId)
-      .get();
-  var data = doc.data();
-  if (data != null) {
-    nameController.text = data['name'] ?? '';
-    priceController.text = data['price'] != null ? data['price'].toString() : '';
-    setState(() {
-      imageUrl = data['imageUrl'];
-    });
+  void fetchProductData() async {
+    try {
+      var doc = await productController.firestore
+          .collection('products')
+          .doc(widget.productId)
+          .get();
+      var data = doc.data();
+      if (data != null) {
+        nameController.text = data['name'] ?? '';
+        priceController.text = data['price'] != null ? data['price'].toString() : '';
+        setState(() {
+          imageUrl = data['imageUrl'];
+        });
+      } else {
+        Get.snackbar(
+          "Error",
+          "Produk tidak ditemukan.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,
+        );
+        Get.back();
+      }
+    } catch (e) {
+      print("Error fetching product data: $e");
+      Get.snackbar(
+        "Error",
+        "Terjadi kesalahan saat mengambil data produk.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
+      Get.back();
+    }
   }
-}
-
 
   Future<void> _pickImage() async {
     final picker = ImagePicker();
@@ -55,6 +75,13 @@ void fetchProductData() async {
       });
     } catch (e) {
       print("Error picking image: $e");
+      Get.snackbar(
+        "Error",
+        "Terjadi kesalahan saat memilih gambar.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -75,6 +102,13 @@ void fetchProductData() async {
         height: 200,
         width: double.infinity,
         fit: BoxFit.cover,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
       );
     } else {
       imageWidget = Container(
@@ -119,13 +153,43 @@ void fetchProductData() async {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  await productController.editProduct(
-                    widget.productId,
-                    name: nameController.text,
-                    price: priceController.text,
-                    imageFile: _image,
-                  );
-                  Get.back();
+                  // Validasi Input
+                  if (nameController.text.trim().isEmpty ||
+                      priceController.text.trim().isEmpty) {
+                    Get.snackbar(
+                      "Error",
+                      "Nama dan harga produk tidak boleh kosong.",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                    return;
+                  }
+
+                  try {
+                    await productController.editProduct(
+                      widget.productId,
+                      name: nameController.text.trim(),
+                      price: priceController.text.trim(),
+                      imageFile: _image,
+                    );
+                    Get.snackbar(
+                      "Berhasil",
+                      "Produk Diperbarui",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                    Get.back();
+                  } catch (e) {
+                    Get.snackbar(
+                      "Error",
+                      "Terjadi kesalahan saat memperbarui produk.",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                    );
+                  }
                 },
                 child: const Text('Simpan'),
               ),
