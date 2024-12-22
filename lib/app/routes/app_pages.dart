@@ -7,6 +7,7 @@ import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_b
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welcome_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
+import '../modules/connection/bindings/connection_binding.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/location/bindings/location_binding.dart';
@@ -32,11 +33,14 @@ class AppPages {
       page: () => LoginPage(),
       binding: LoginBinding(),
     ),
-    GetPage(
+GetPage(
       name: Routes.signUp,
       page: () => SignUpScreen(),
-      binding: AuthBinding(),
-      transition: Transition.fadeIn, // Optional: Add transition effect
+      bindings: [
+        AuthBinding(),
+        ConnectionBinding(),
+      ],
+      transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     GetPage(
       name: Routes.home,
