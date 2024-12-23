@@ -1,5 +1,3 @@
-// lib/app/modules/transaction/controllers/payment_controller.dart
-
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/payment_model.dart';
@@ -7,13 +5,13 @@ import '../models/payment_model.dart';
 class PaymentController extends GetxController {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-  // Observable list of payments (for future history feature)
+  // Observable list pembayaran (jika ingin menampilkan riwayat)
   var payments = <PaymentModel>[].obs;
 
-  // Observable for loading state
+  // Observable untuk loading state
   var isLoading = false.obs;
 
-  // Function to initiate a payment
+  // Fungsi untuk inisiasi pembayaran
   Future<String?> makePayment({
     required String userId,
     required String productId,
@@ -21,19 +19,18 @@ class PaymentController extends GetxController {
     required String paymentMethod,
   }) async {
     isLoading.value = true;
-
     try {
-      // Create a new payment document
+      // Buat dokumen payment baru
       DocumentReference docRef = await firestore.collection('payments').add({
         'userId': userId,
         'productId': productId,
         'amount': amount,
-        'paymentMethod': paymentMethod,
-        'status': 'completed', // Change to 'pending' if integrating with payment gateways
+        'paymentMethod': paymentMethod, // Diset ke "QR Payment"
+        'status': 'completed', // Atau 'pending' jika terintegrasi gateway
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      // Optionally, create an invoice linked to this payment
+      // Buat invoice terhubung dengan payment ini
       await firestore.collection('invoices').add({
         'userId': userId,
         'transactionId': docRef.id,
@@ -43,21 +40,26 @@ class PaymentController extends GetxController {
         'timestamp': FieldValue.serverTimestamp(),
       });
 
-      Get.snackbar("Success", "Payment Successful",
-          snackPosition: SnackPosition.BOTTOM);
-
+      Get.snackbar(
+        "Success",
+        "Payment Successful",
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return docRef.id;
     } catch (e) {
-      Get.snackbar("Error", "Payment Failed: $e",
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        "Error",
+        "Payment Failed: $e",
+        snackPosition: SnackPosition.BOTTOM,
+      );
       return null;
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Future function to fetch payments (for history)
+  // Contoh: Fungsi fetchPayments (untuk history)
   void fetchPayments() {
-    // Implement fetching payments from Firestore
+    // Implementasi jika dibutuhkan
   }
 }

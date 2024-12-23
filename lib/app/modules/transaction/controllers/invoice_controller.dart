@@ -1,5 +1,3 @@
-// lib/app/modules/transaction/controllers/invoice_controller.dart
-
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/invoice_model.dart';
@@ -10,22 +8,19 @@ class InvoiceController extends GetxController {
   // Observable invoice
   var invoice = Rxn<InvoiceModel>();
 
-  // Observable for loading state
+  // Observable untuk loading state
   var isLoading = false.obs;
 
-  // Function to fetch an invoice by transactionId
+  // Fungsi untuk fetch invoice berdasarkan transactionId
   Future<void> fetchInvoice(String transactionId) async {
     isLoading.value = true;
-
     try {
-      // Query invoices by transactionId
-      QuerySnapshot snapshot = await firestore
+      final QuerySnapshot snapshot = await firestore
           .collection('invoices')
           .where('transactionId', isEqualTo: transactionId)
           .get();
 
       if (snapshot.docs.isNotEmpty) {
-        // Assuming one invoice per transaction
         var doc = snapshot.docs.first;
         invoice.value =
             InvoiceModel.fromMap(doc.data() as Map<String, dynamic>, doc.id);
@@ -34,15 +29,18 @@ class InvoiceController extends GetxController {
             snackPosition: SnackPosition.BOTTOM);
       }
     } catch (e) {
-      Get.snackbar("Error", "Failed to fetch invoice: $e",
-          snackPosition: SnackPosition.BOTTOM);
+      Get.snackbar(
+        "Error",
+        "Failed to fetch invoice: $e",
+        snackPosition: SnackPosition.BOTTOM,
+      );
     } finally {
       isLoading.value = false;
     }
   }
 
-  // Future function to fetch invoices (for history)
+  // Contoh: Fungsi fetchInvoices (untuk history)
   void fetchInvoices() {
-    // Implement fetching invoices from Firestore
+    // Implementasi jika dibutuhkan
   }
 }
