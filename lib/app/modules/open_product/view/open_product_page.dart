@@ -1,10 +1,14 @@
 // lib/app/modules/open_product/view/open_product_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
 import '../../product/controllers/product_controller.dart';
 import '../../../routes/app_routes.dart';
+// import '../../components/bottom_navbar.dart'; // Hapus jika tidak digunakan
 
+// Controller untuk OpenProductPage
 class OpenProductController extends GetxController {
   final String productId;
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
@@ -83,7 +87,8 @@ class OpenProductPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productController = Get.find<ProductController>();
-    // Mendapatkan productId dari productIndex
+
+    // Validasi productIndex
     if (productIndex < 0 || productIndex >= productController.products.length) {
       return Scaffold(
         appBar: AppBar(
@@ -95,6 +100,7 @@ class OpenProductPage extends StatelessWidget {
       );
     }
 
+    // Mendapatkan productId dari productIndex
     final productId = productController.products[productIndex].id;
 
     // Inisialisasi controller dengan productId
@@ -131,8 +137,7 @@ class OpenProductPage extends StatelessWidget {
                 controller.isFavorited.value
                     ? Icons.favorite
                     : Icons.favorite_border,
-                color:
-                    controller.isFavorited.value ? Colors.red : Colors.black,
+                color: controller.isFavorited.value ? Colors.red : Colors.black,
               ),
               onPressed: () {
                 controller.toggleFavorite();
@@ -275,7 +280,11 @@ class OpenProductPage extends StatelessWidget {
                     ElevatedButton(
                       onPressed: () {
                         // Pergi ke detail product dengan mengirimkan productId
-                        Get.toNamed(Routes.detailProduct, arguments: productId);
+                        Get.toNamed(
+                          Routes.detailProduct,
+                          arguments: {'productId': productId},
+                          // binding: DetailProductBindings(), // Hapus atau definisikan di route
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -330,7 +339,7 @@ class OpenProductPage extends StatelessWidget {
             ),
           ),
         );
-      }),
-    );
+      }), // Tutup Obx
+    ); // Tutup Scaffold
   }
 }
