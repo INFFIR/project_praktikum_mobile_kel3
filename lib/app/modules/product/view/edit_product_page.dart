@@ -1,9 +1,10 @@
-// lib/app/product/views/edit_product_page.dart
+// lib/app/modules/product/views/edit_product_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../controllers/product_controller.dart';
+import '../../../routes/app_routes.dart'; // Pastikan path ini sesuai
 
 class EditProductPage extends StatefulWidget {
   final String productId;
@@ -18,6 +19,8 @@ class _EditProductPageState extends State<EditProductPage> {
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
+  final TextEditingController descriptionController = TextEditingController();
+
   File? _image;
   String? imageUrl;
 
@@ -37,6 +40,7 @@ class _EditProductPageState extends State<EditProductPage> {
       if (data != null) {
         nameController.text = data['name'] ?? '';
         priceController.text = data['price']?.toString() ?? '';
+        descriptionController.text = data['description'] ?? '';
         setState(() {
           imageUrl = data['imageUrl'];
         });
@@ -48,7 +52,7 @@ class _EditProductPageState extends State<EditProductPage> {
           backgroundColor: Colors.red.withOpacity(0.5),
           colorText: Colors.white,
         );
-        Get.back();
+        Get.offNamed(Routes.homeAdmin);
       }
     } catch (e) {
       Get.snackbar(
@@ -58,7 +62,7 @@ class _EditProductPageState extends State<EditProductPage> {
         backgroundColor: Colors.red.withOpacity(0.5),
         colorText: Colors.white,
       );
-      Get.back();
+      Get.offNamed(Routes.homeAdmin);
     }
   }
 
@@ -146,6 +150,14 @@ class _EditProductPageState extends State<EditProductPage> {
                 ),
                 keyboardType: TextInputType.number,
               ),
+              const SizedBox(height: 8),
+              TextField(
+                controller: descriptionController,
+                decoration: const InputDecoration(
+                  labelText: 'Deskripsi Produk',
+                ),
+                maxLines: 3,
+              ),
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
@@ -167,6 +179,7 @@ class _EditProductPageState extends State<EditProductPage> {
                       name: nameController.text.trim(),
                       price: priceController.text.trim(),
                       imageFile: _image,
+                      description: descriptionController.text.trim(),
                     );
                     Get.snackbar(
                       "Berhasil",
@@ -175,7 +188,8 @@ class _EditProductPageState extends State<EditProductPage> {
                       backgroundColor: Colors.green.withOpacity(0.5),
                       colorText: Colors.white,
                     );
-                    Get.back();
+                    // Navigasi ke HomeAdminPage dan hapus halaman EditProductPage dari stack
+                    Get.offNamed(Routes.homeAdmin);
                   } catch (e) {
                     Get.snackbar(
                       "Error",

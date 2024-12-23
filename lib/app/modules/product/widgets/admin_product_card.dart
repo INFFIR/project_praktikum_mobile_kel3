@@ -1,3 +1,4 @@
+// lib/app/modules/product/widgets/admin_product_card.dart
 import 'package:flutter/material.dart';
 import 'dart:io';
 
@@ -5,17 +6,19 @@ class AdminProductCard extends StatelessWidget {
   final String image;
   final String name;
   final String price;
+  final String description; // Menambahkan deskripsi
   final VoidCallback onEdit;
   final VoidCallback onDelete;
 
   const AdminProductCard({
-    super.key,
+    Key? key,
     required this.image,
     required this.name,
     required this.price,
+    required this.description, // Menambahkan deskripsi
     required this.onEdit,
     required this.onDelete,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +87,16 @@ class AdminProductCard extends StatelessWidget {
                 Text(
                   price.isNotEmpty ? price : 'Harga Tidak Tersedia',
                   style: const TextStyle(fontSize: 14),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description.isNotEmpty ? description : 'Tidak ada deskripsi',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey,
+                  ),
+                  maxLines: 1, // Membatasi ke satu baris
+                  overflow: TextOverflow.ellipsis, // Menambahkan elipsis
                 ),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -5,6 +5,7 @@ class ProductModel {
   final int price;
   final String imageUrl;
   final int likes;
+  final String description;
 
   ProductModel({
     required this.id,
@@ -12,9 +13,9 @@ class ProductModel {
     required this.price,
     required this.imageUrl,
     required this.likes,
+    required this.description,
   });
 
-  // Contoh helper untuk convert dari Firestore
   factory ProductModel.fromMap(String docId, Map<String, dynamic> data) {
     return ProductModel(
       id: docId,
@@ -22,6 +23,7 @@ class ProductModel {
       price: data['price'] ?? 0,
       imageUrl: data['imageUrl'] ?? '',
       likes: data['likes'] ?? 0,
+      description: data['description'] ?? 'Tidak ada deskripsi',
     );
   }
 }

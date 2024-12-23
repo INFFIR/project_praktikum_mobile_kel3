@@ -1,10 +1,11 @@
-// lib/app/promo/views/edit_promo_page.dart
+// lib/app/modules/promo/views/edit_promo_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../controllers/promo_controller.dart';
 import '../models/promo_model.dart';
+import '../../../routes/app_routes.dart'; // Pastikan path ini sesuai dengan struktur proyek Anda
 
 class EditPromoPage extends StatefulWidget {
   final String promoId;
@@ -31,19 +32,41 @@ class _EditPromoPageState extends State<EditPromoPage> {
   }
 
   void fetchPromoData() async {
-    final doc = await promoController.firestore
-        .collection('promos')
-        .doc(widget.promoId)
-        .get();
-    final data = doc.data();
-    if (data != null) {
-      titleController.text = data['titleText'] ?? '';
-      contentController.text = data['contentText'] ?? '';
-      labelController.text = data['promoLabelText'] ?? '';
-      descriptionController.text = data['promoDescriptionText'] ?? '';
-      setState(() {
-        imageUrl = data['imageUrl'];
-      });
+    try {
+      final doc = await promoController.firestore
+          .collection('promos')
+          .doc(widget.promoId)
+          .get();
+      final data = doc.data();
+      if (data != null) {
+        titleController.text = data['titleText'] ?? '';
+        contentController.text = data['contentText'] ?? '';
+        labelController.text = data['promoLabelText'] ?? '';
+        descriptionController.text = data['promoDescriptionText'] ?? '';
+        setState(() {
+          imageUrl = data['imageUrl'];
+        });
+      } else {
+        Get.snackbar(
+          "Error",
+          "Promo tidak ditemukan.",
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: Colors.red.withOpacity(0.5),
+          colorText: Colors.white,
+        );
+        // Navigasi kembali ke HomeAdminPage jika promo tidak ditemukan
+        Get.offNamed(Routes.homeAdmin);
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Terjadi kesalahan saat mengambil data promo.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
+      // Navigasi kembali ke HomeAdminPage jika terjadi kesalahan
+      Get.offNamed(Routes.homeAdmin);
     }
   }
 
@@ -55,7 +78,13 @@ class _EditPromoPageState extends State<EditPromoPage> {
         _image = pickedFile != null ? File(pickedFile.path) : null;
       });
     } catch (e) {
-      // Tangani error
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan saat memilih gambar.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -75,6 +104,13 @@ class _EditPromoPageState extends State<EditPromoPage> {
         height: 200,
         width: double.infinity,
         fit: BoxFit.cover,
+        errorBuilder: (ctx, err, stack) {
+          return Image.asset(
+            'assets/promo/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
       );
     } else {
       imageWidget = Container(
@@ -141,31 +177,43 @@ class _EditPromoPageState extends State<EditPromoPage> {
                     Get.snackbar(
                       'Error',
                       'Semua field harus diisi.',
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.red.withOpacity(0.5),
                       colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
                     );
                     return;
                   }
-
-                  await promoController.editPromo(
-                    widget.promoId,
-                    PromoModel(
-                      id: widget.promoId,
-                      imageUrl: '', // akan di-replace kalau ada upload
-                      titleText: titleController.text,
-                      contentText: contentController.text,
-                      promoLabelText: labelController.text,
-                      promoDescriptionText: descriptionController.text,
-                    ),
-                    _image,
-                  );
-                  Get.snackbar(
-                    'Sukses',
-                    'Promo berhasil diperbarui.',
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                  );
-                  Get.back();
+                  try {
+                    await promoController.editPromo(
+                      widget.promoId,
+                      PromoModel(
+                        id: widget.promoId,
+                        imageUrl: '', // Akan di-replace jika ada upload
+                        titleText: titleController.text,
+                        contentText: contentController.text,
+                        promoLabelText: labelController.text,
+                        promoDescriptionText: descriptionController.text,
+                      ),
+                      _image,
+                    );
+                    Get.snackbar(
+                      'Sukses',
+                      'Promo berhasil diperbarui.',
+                      backgroundColor: Colors.green.withOpacity(0.5),
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    // Navigasi ke HomeAdminPage dan hapus halaman EditPromoPage dari stack
+                    Get.offNamed(Routes.homeAdmin);
+                  } catch (e) {
+                    Get.snackbar(
+                      'Error',
+                      'Terjadi kesalahan saat memperbarui promo.',
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
                 },
                 child: const Text('Simpan'),
               ),

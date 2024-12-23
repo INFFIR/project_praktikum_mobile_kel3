@@ -14,11 +14,9 @@ class ProductController extends GetxController {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String get currentUserId => _auth.currentUser?.uid ?? '';
 
-  // Ubah jadi list of ProductModel
   final products = <ProductModel>[].obs;
   final filteredProducts = <ProductModel>[].obs;
 
-  // Map productId -> RxBool
   final isFavorited = <String, RxBool>{}.obs;
 
   final _snackbarLastShown = DateTime.now().subtract(const Duration(seconds: 1)).obs;
@@ -38,7 +36,6 @@ class ProductController extends GetxController {
         final product = ProductModel.fromMap(doc.id, data);
         tempList.add(product);
       }
-
       products.value = tempList;
       filteredProducts.assignAll(tempList);
 
@@ -80,6 +77,7 @@ class ProductController extends GetxController {
     required String name,
     required String price,
     required File? imageFile,
+    required String description,
   }) async {
     try {
       final parsedPrice = int.tryParse(price);
@@ -97,6 +95,7 @@ class ProductController extends GetxController {
         'price': parsedPrice,
         'imageUrl': imageUrl,
         'likes': 0,
+        'description': description.isNotEmpty ? description : 'Tidak ada deskripsi',
       });
     } catch (e) {
       rethrow;
@@ -116,6 +115,7 @@ class ProductController extends GetxController {
     required String name,
     required String price,
     required File? imageFile,
+    required String description,
   }) async {
     try {
       final parsedPrice = int.tryParse(price);
@@ -126,6 +126,7 @@ class ProductController extends GetxController {
       final updatedData = {
         'name': name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
         'price': parsedPrice,
+        'description': description.isNotEmpty ? description : 'Tidak ada deskripsi',
       };
 
       if (imageFile != null) {

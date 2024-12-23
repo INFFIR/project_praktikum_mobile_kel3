@@ -1,10 +1,11 @@
-// lib/app/promo/views/add_promo_page.dart
+// lib/app/modules/promo/views/add_promo_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'dart:io';
 import '../controllers/promo_controller.dart';
 import '../models/promo_model.dart';
+import '../../../routes/app_routes.dart'; // Pastikan path ini sesuai dengan struktur proyek Anda
 
 class AddPromoPage extends StatefulWidget {
   const AddPromoPage({super.key});
@@ -30,7 +31,13 @@ class _AddPromoPageState extends State<AddPromoPage> {
         _image = pickedFile != null ? File(pickedFile.path) : null;
       });
     } catch (e) {
-      Get.snackbar('Error', 'Terjadi kesalahan saat memilih gambar.');
+      Get.snackbar(
+        'Error',
+        'Terjadi kesalahan saat memilih gambar.',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.withOpacity(0.5),
+        colorText: Colors.white,
+      );
     }
   }
 
@@ -104,29 +111,42 @@ class _AddPromoPageState extends State<AddPromoPage> {
                     Get.snackbar(
                       'Error',
                       'Semua field harus diisi.',
-                      backgroundColor: Colors.red,
+                      backgroundColor: Colors.red.withOpacity(0.5),
                       colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
                     );
                     return;
                   }
-                  await promoController.addPromo(
-                    PromoModel(
-                      id: '',
-                      imageUrl: '',
-                      titleText: titleController.text,
-                      contentText: contentController.text,
-                      promoLabelText: labelController.text,
-                      promoDescriptionText: descriptionController.text,
-                    ),
-                    _image,
-                  );
-                  Get.snackbar(
-                    'Sukses',
-                    'Promo berhasil ditambahkan.',
-                    backgroundColor: Colors.green,
-                    colorText: Colors.white,
-                  );
-                  Get.back();
+                  try {
+                    await promoController.addPromo(
+                      PromoModel(
+                        id: '',
+                        imageUrl: '',
+                        titleText: titleController.text,
+                        contentText: contentController.text,
+                        promoLabelText: labelController.text,
+                        promoDescriptionText: descriptionController.text,
+                      ),
+                      _image,
+                    );
+                    Get.snackbar(
+                      'Sukses',
+                      'Promo berhasil ditambahkan.',
+                      backgroundColor: Colors.green.withOpacity(0.5),
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                    // Navigasi ke HomeAdminPage dan hapus halaman AddPromoPage dari stack
+                    Get.offNamed(Routes.homeAdmin);
+                  } catch (e) {
+                    Get.snackbar(
+                      'Error',
+                      'Terjadi kesalahan saat menambahkan promo.',
+                      backgroundColor: Colors.red.withOpacity(0.5),
+                      colorText: Colors.white,
+                      snackPosition: SnackPosition.BOTTOM,
+                    );
+                  }
                 },
                 child: const Text('Simpan'),
               ),

@@ -25,9 +25,9 @@ class HomeAdminPage extends StatefulWidget {
 }
 
 class _HomeAdminPageState extends State<HomeAdminPage> {
-  final productController = Get.find<ProductController>();
-  final promoController = Get.find<PromoController>();
-  final notificationService = NotificationService();
+  final ProductController productController = Get.find<ProductController>();
+  final PromoController promoController = Get.find<PromoController>();
+  final NotificationService notificationService = NotificationService();
 
   @override
   void initState() {
@@ -43,7 +43,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
 
   void _addNewPromo() {
     // Jika Anda punya route untuk menambah promo, misalnya '/promo-add':
-    Get.toNamed('/promo-add');
+    Get.toNamed(Routes.promoAdd);
   }
 
   @override
@@ -61,7 +61,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Tombol notifikasi
+            // Tombol Notifikasi
             Padding(
               padding: const EdgeInsets.all(16.0),
               child: Column(
@@ -133,13 +133,14 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                     crossAxisSpacing: 8.0,
                     mainAxisSpacing: 8.0,
                   ),
-                  itemCount: productController.products.length,
+                  itemCount: productController.filteredProducts.length,
                   itemBuilder: (context, index) {
-                    final product = productController.products[index];
+                    final product = productController.filteredProducts[index];
                     return AdminProductCard(
                       image: product.imageUrl,
                       name: product.name,
                       price: 'Rp ${product.price}',
+                      description: product.description, // Menambahkan deskripsi
                       onEdit: () {
                         // Panggil route '/product-edit?productId=xxx'
                         Get.toNamed('${Routes.productEdit}?productId=${product.id}');
@@ -159,6 +160,13 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                                 onPressed: () {
                                   productController.deleteProduct(product.id);
                                   Get.back();
+                                  Get.snackbar(
+                                    'Berhasil',
+                                    'Produk telah dihapus.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.green.withOpacity(0.5),
+                                    colorText: Colors.white,
+                                  );
                                 },
                                 child: const Text('Hapus'),
                               ),
@@ -214,7 +222,7 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                       description: promo.promoDescriptionText,
                       onEdit: () {
                         // Misal route '/promo-edit?promoId=xxx'
-                        Get.toNamed('/promo-edit?promoId=${promo.id}');
+                        Get.toNamed('${Routes.promoEdit}?promoId=${promo.id}');
                       },
                       onDelete: () {
                         showDialog(
@@ -231,6 +239,13 @@ class _HomeAdminPageState extends State<HomeAdminPage> {
                                 onPressed: () {
                                   promoController.deletePromo(promo.id);
                                   Get.back();
+                                  Get.snackbar(
+                                    'Berhasil',
+                                    'Promo telah dihapus.',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    backgroundColor: Colors.green.withOpacity(0.5),
+                                    colorText: Colors.white,
+                                  );
                                 },
                                 child: const Text('Hapus'),
                               ),
