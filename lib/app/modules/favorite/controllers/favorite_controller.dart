@@ -28,14 +28,20 @@ class FavoriteController extends GetxController {
   }
 
   void fetchFavoriteProducts() {
-    // Memfilter produk yang di favoritkan oleh pengguna saat ini
-    // favoriteProducts.value = productController.products.where((product) {
-    //   String productId = product['id'] as String;
-    //   return productController.isFavorited[productId]?.value ?? false;
-    // }).toList();
+    // Ambil semua product yang difavoritkan
+    final userFavoriteProducts = productController.products
+        .where((prod) => productController.isFavorited[prod.id]?.value ?? false)
+        .map((prod) => {
+              'id': prod.id,
+              'name': prod.name,
+              'price': prod.price,
+              'imageUrl': prod.imageUrl,
+              'likes': prod.likes,
+            })
+        .toList();
 
-    // Secara awal, tampilkan semua produk favorit
-    filteredFavoriteProducts.assignAll(favoriteProducts);
+    favoriteProducts.assignAll(userFavoriteProducts);
+    filteredFavoriteProducts.assignAll(userFavoriteProducts);
   }
 
   // Fungsi untuk memfilter produk favorit berdasarkan query pencarian
