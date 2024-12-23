@@ -1,4 +1,6 @@
+// lib/app/product/widgets/product_card.dart
 import 'package:flutter/material.dart';
+import 'dart:io';
 
 class ProductCard extends StatelessWidget {
   final String imageUrl;
@@ -24,7 +26,22 @@ class ProductCard extends StatelessWidget {
   Widget build(BuildContext context) {
     Widget imageWidget;
 
-    if (imageUrl.isNotEmpty) {
+    if (imageUrl.startsWith('assets/')) {
+      // Memuat gambar dari assets
+      imageWidget = Image.asset(
+        imageUrl,
+        fit: BoxFit.cover,
+        width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
+      );
+    } else if (imageUrl.startsWith('http')) {
+      // Memuat gambar dari URL jaringan
       imageWidget = Image.network(
         imageUrl,
         fit: BoxFit.cover,
@@ -38,10 +55,18 @@ class ProductCard extends StatelessWidget {
         },
       );
     } else {
-      imageWidget = Image.asset(
-        'assets/product/default.jpg',
+      // Memuat gambar dari file lokal
+      imageWidget = Image.file(
+        File(imageUrl),
         fit: BoxFit.cover,
         width: double.infinity,
+        errorBuilder: (context, error, stackTrace) {
+          return Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        },
       );
     }
 
@@ -49,8 +74,12 @@ class ProductCard extends StatelessWidget {
       onTap: onTap,
       child: Card(
         child: Column(
+          mainAxisSize: MainAxisSize.min, // Mengatur ukuran Column sesuai konten
           children: [
-            Expanded(child: imageWidget),
+            Flexible(
+              fit: FlexFit.loose, // Mengganti Expanded dengan Flexible
+              child: imageWidget,
+            ),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Column(
@@ -64,7 +93,7 @@ class ProductCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    price.isNotEmpty ? price : 'Harga Tidak Tersedia',
+                    price.isNotEmpty ? price : 'Harga Tidak Detersedia',
                     style: const TextStyle(fontSize: 14),
                   ),
                   Row(

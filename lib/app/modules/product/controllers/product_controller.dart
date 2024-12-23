@@ -1,3 +1,4 @@
+// lib/app/product/controllers/product_controller.dart
 import 'package:get/get.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -18,6 +19,9 @@ class ProductController extends GetxController {
 
   // Untuk debounce snackbar
   final _snackbarLastShown = DateTime.now().subtract(Duration(seconds: 1)).obs;
+
+  // Tambahkan variabel observabel untuk listening (speech-to-text)
+  final isListening = false.obs;
 
   @override
   void onInit() {
@@ -149,16 +153,7 @@ class ProductController extends GetxController {
     }
   }
 
-  Future<String> _uploadImageToStorage(File imageFile, String folder) async {
-    Reference storageReference = storage.ref().child(
-        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
-    UploadTask uploadTask = storageReference.putFile(imageFile);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    String imageUrl = await taskSnapshot.ref.getDownloadURL();
-    return imageUrl;
-  }
-
-  void toggleFavorite(int index) async {
+  Future<void> toggleFavorite(int index) async {
     try {
       final product = products[index];
       final productId = product['id'] as String;
@@ -191,6 +186,40 @@ class ProductController extends GetxController {
     }
   }
 
+  // Fungsi untuk toggle favorit berdasarkan productId
+  Future<void> toggleFavoriteById(String productId) async {
+    try {
+      final favRef = firestore
+          .collection('products')
+          .doc(productId)
+          .collection('favorites')
+          .doc(currentUserId);
+
+      final favDoc = await favRef.get();
+
+      if (favDoc.exists) {
+        await favRef.delete();
+        // Update likes
+        await firestore.collection('products').doc(productId).update({
+          'likes': FieldValue.increment(-1),
+        });
+        isFavorited[productId]?.value = false;
+        _showSnackbar("Favorit Dihapus");
+      } else {
+        await favRef.set({'userId': currentUserId});
+        // Update likes
+        await firestore.collection('products').doc(productId).update({
+          'likes': FieldValue.increment(1),
+        });
+        isFavorited[productId]?.value = true;
+        _showSnackbar("Favorit Ditambahkan");
+      }
+    } catch (e) {
+      print("Error in toggleFavoriteById: $e");
+      throw e;
+    }
+  }
+
   // Fungsi untuk mereset hasil pencarian
   void resetSearch() {
     filteredProducts.assignAll(products);
@@ -204,5 +233,14 @@ class ProductController extends GetxController {
       Get.snackbar("Info", message, snackPosition: SnackPosition.BOTTOM);
       _snackbarLastShown.value = now;
     }
+  }
+
+  Future<String> _uploadImageToStorage(File imageFile, String folder) async {
+    Reference storageReference = storage.ref().child(
+        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
+    UploadTask uploadTask = storageReference.putFile(imageFile);
+    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
+    String imageUrl = await taskSnapshot.ref.getDownloadURL();
+    return imageUrl;
   }
 }

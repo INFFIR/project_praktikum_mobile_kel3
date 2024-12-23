@@ -8,6 +8,8 @@ import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.
 import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welcome_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/connection/bindings/connection_binding.dart';
+import '../modules/favorite/bindings/favorite_binding.dart';
+import '../modules/favorite/views/favorite_page.dart';
 import '../modules/profile/bindings/profile_binding.dart';
 import '../modules/profile/views/profile_view.dart';
 import '../modules/location/bindings/location_binding.dart';
@@ -55,7 +57,7 @@ GetPage(
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
     GetPage(
-      name: '/profile',
+      name: Routes.profile,
       page: () => const ProfileView(),
       binding: ProfileBinding(),
     ),
@@ -69,6 +71,11 @@ GetPage(
       name: Routes.location,
       page: () => LocationView(),
       binding: LocationBinding(),
+    ),
+    GetPage(
+      name: Routes.favorites,
+      page: () => const FavoritePage(),
+      binding: FavoriteBinding(),
     ),
 
   ];
