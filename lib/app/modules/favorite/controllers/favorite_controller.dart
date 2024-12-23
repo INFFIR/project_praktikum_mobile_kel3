@@ -29,10 +29,10 @@ class FavoriteController extends GetxController {
 
   void fetchFavoriteProducts() {
     // Memfilter produk yang di favoritkan oleh pengguna saat ini
-    favoriteProducts.value = productController.products.where((product) {
-      String productId = product['id'] as String;
-      return productController.isFavorited[productId]?.value ?? false;
-    }).toList();
+    // favoriteProducts.value = productController.products.where((product) {
+    //   String productId = product['id'] as String;
+    //   return productController.isFavorited[productId]?.value ?? false;
+    // }).toList();
 
     // Secara awal, tampilkan semua produk favorit
     filteredFavoriteProducts.assignAll(favoriteProducts);

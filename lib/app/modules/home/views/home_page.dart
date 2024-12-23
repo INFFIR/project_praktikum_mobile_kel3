@@ -1,63 +1,68 @@
+// lib/app/modules/home/views/home_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-import '../../../routes/app_routes.dart';
-import '../../components/bottom_navbar.dart';
-import '../../open_product/view/open_product_page.dart';
+
+// Controller
 import '../../product/controllers/product_controller.dart';
-import '../../product/controllers/promo_controller.dart';
-import '../../product/widgets/promo_card.dart';
-import '../../product/widgets/product_card.dart'; // Pastikan impor benar
-import 'home_admin_page.dart';
+import '../../promo/controllers/promo_controller.dart';
+
+// Widget
+import '../../components/bottom_navbar.dart';
+import '../../product/widgets/product_card.dart';
+import '../../promo/widgets/promo_card.dart'; // Pastikan jalur impor benar
+
+// Lain-lain
+import '../../../routes/app_routes.dart';
 import '../../services/notification_list_page.dart';
+import '../../open_product/view/open_product_page.dart'; // Pastikan jalurnya benar
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final PromoController promoController = Get.put(PromoController());
-    final ProductController productController = Get.put(ProductController());
+    // Ambil controller
+    final promoController = Get.find<PromoController>();
+    final productController = Get.find<ProductController>();
 
-    // Controller untuk input pencarian
+    // Controller text
     final TextEditingController searchController = TextEditingController();
 
-    // State untuk speech-to-text
-    late stt.SpeechToText speechToText;
+    // Speech to text
+    final stt.SpeechToText speechToText = stt.SpeechToText();
     bool isListening = false;
 
-    // Init speech-to-text
-    speechToText = stt.SpeechToText();
+    // Inisialisasi BottomNavController
     Get.put(BottomNavController());
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
+            // Menu popup
             PopupMenuButton<String>(
-              icon: const Icon(Icons.menu), // Ikon menu tiga garis
+              icon: const Icon(Icons.menu),
               onSelected: (String value) {
                 if (value == 'Admin Panel') {
-                  Get.to(() => const HomeAdminPage());
+                  Get.toNamed('/home_admin');
                 } else if (value == 'Settings') {
-                  // Gunakan rute bernama untuk memastikan binding diterapkan
                   Get.toNamed(Routes.settings);
                 }
               },
-              itemBuilder: (BuildContext context) {
-                return [
-                  const PopupMenuItem<String>(
-                    value: 'Admin Panel',
-                    child: Text('Admin Panel'),
-                  ),
-                  const PopupMenuItem<String>(
-                    value: 'Settings',
-                    child: Text('Settings'),
-                  ),
-                ];
-              },
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem<String>(
+                  value: 'Admin Panel',
+                  child: Text('Admin Panel'),
+                ),
+                const PopupMenuItem<String>(
+                  value: 'Settings',
+                  child: Text('Settings'),
+                ),
+              ],
             ),
             IconButton(
               icon: const Icon(Icons.notifications),
@@ -69,16 +74,16 @@ class HomePage extends StatelessWidget {
         ),
       ),
       body: Obx(() {
-        // Cek apakah products dan isFavorited sudah terisi
+        // Jika products kosong dan filtered juga kosong
         if (productController.filteredProducts.isEmpty &&
             productController.products.isEmpty) {
-          // Tampilkan indikator pemuatan jika data belum dimuat
           return const Center(child: CircularProgressIndicator());
         }
 
         return SingleChildScrollView(
           child: Column(
             children: [
+              // Greetings
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: Row(
@@ -105,17 +110,34 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              const PromoSection(),
 
-              // Input Pencarian dengan speech-to-text
+              // Promo Section (1 item per geser), gambar menyesuaikan box
+              SizedBox(
+                height: 200, // Tinggi area promo (bisa disesuaikan)
+                child: PageView.builder(
+                  controller: PageController(viewportFraction: 1),
+                  scrollDirection: Axis.horizontal,
+                  itemCount: promoController.promoItems.length,
+                  itemBuilder: (context, index) {
+                    final promo = promoController.promoItems[index];
+                    return PromoCard(
+                      imageUrl: promo.imageUrl,
+                      title: promo.titleText,
+                      content: promo.contentText,
+                      promoLabel: promo.promoLabelText,
+                    );
+                  },
+                ),
+              ),
+
+              // Input Pencarian
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
                 child: TextField(
                   controller: searchController,
-                  onChanged: (value) {
-                    productController.filterProducts(value);
-                  },
+                  onChanged: (value) =>
+                      productController.filterProducts(value),
                   decoration: InputDecoration(
                     prefixIcon: const Icon(Icons.search, color: Colors.grey),
                     suffixIcon: IconButton(
@@ -127,14 +149,11 @@ class HomePage extends StatelessWidget {
                         if (await Permission.microphone.request().isGranted) {
                           if (!isListening) {
                             bool available = await speechToText.initialize(
-                              onStatus: (status) {
-                                print('SpeechToText Status: $status');
-                              },
-                              onError: (error) {
-                                print('SpeechToText Error: ${error.errorMsg}');
-                              },
+                              onStatus: (status) =>
+                                  debugPrint('STT Status: $status'),
+                              onError: (error) =>
+                                  debugPrint('STT Error: ${error.errorMsg}'),
                             );
-
                             if (available) {
                               isListening = true;
                               speechToText.listen(
@@ -159,14 +178,9 @@ class HomePage extends StatelessWidget {
                       },
                     ),
                     hintText: 'Search',
-                    hintStyle: const TextStyle(color: Colors.grey),
                     filled: true,
-                    fillColor: const Color.fromARGB(255, 255, 255, 255),
+                    fillColor: Colors.white,
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8),
-                      borderSide: const BorderSide(color: Colors.black),
-                    ),
-                    enabledBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(8),
                       borderSide: const BorderSide(color: Colors.black),
                     ),
@@ -207,19 +221,23 @@ class HomePage extends StatelessWidget {
                   ),
                   itemCount: productController.filteredProducts.length,
                   itemBuilder: (context, index) {
-                    var product = productController.filteredProducts[index];
-                    String productId = product['id'] as String;
+                    final product = productController.filteredProducts[index];
+                    final productId = product.id;
+                    final isFavorited =
+                        productController.isFavorited[productId]?.value ??
+                            false;
+
                     return ProductCard(
-                      imageUrl: product['imageUrl'] ?? '',
-                      name: product['name'] ?? 'Nama Produk Tidak Tersedia',
-                      price: 'Rp ${product['price'] ?? 'Harga Tidak Tersedia'}',
-                      likes: product['likes'] ?? 0,
-                      isFavorited:
-                          productController.isFavorited[productId]?.value ?? false,
+                      imageUrl: product.imageUrl,
+                      name: product.name,
+                      price: 'Rp ${product.price}',
+                      likes: product.likes,
+                      isFavorited: isFavorited,
                       onFavoriteToggle: () {
                         productController.toggleFavorite(index);
                       },
                       onTap: () {
+                        // Buka halaman detail product custom
                         Get.to(() => OpenProductPage(productIndex: index));
                       },
                     );
@@ -230,7 +248,7 @@ class HomePage extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: const BottomNavBar(), // Panggil BottomNavBar secara langsung
+      bottomNavigationBar: const BottomNavBar(),
     );
   }
 }

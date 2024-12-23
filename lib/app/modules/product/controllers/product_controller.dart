@@ -5,22 +5,23 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../models/product_model.dart';
+
 class ProductController extends GetxController {
   final FirebaseFirestore firestore = FirebaseFirestore.instance;
   final FirebaseStorage storage = FirebaseStorage.instance;
 
-  // Menggunakan FirebaseAuth untuk mendapatkan currentUserId
   final FirebaseAuth _auth = FirebaseAuth.instance;
   String get currentUserId => _auth.currentUser?.uid ?? '';
 
-  final products = <Map<String, dynamic>>[].obs;
-  final filteredProducts = <Map<String, dynamic>>[].obs; // Produk hasil filter
-  final isFavorited = <String, RxBool>{}.obs; // Menggunakan Map untuk isFavorited
+  // Ubah jadi list of ProductModel
+  final products = <ProductModel>[].obs;
+  final filteredProducts = <ProductModel>[].obs;
 
-  // Untuk debounce snackbar
-  final _snackbarLastShown = DateTime.now().subtract(Duration(seconds: 1)).obs;
+  // Map productId -> RxBool
+  final isFavorited = <String, RxBool>{}.obs;
 
-  // Tambahkan variabel observabel untuk listening (speech-to-text)
+  final _snackbarLastShown = DateTime.now().subtract(const Duration(seconds: 1)).obs;
   final isListening = false.obs;
 
   @override
@@ -31,42 +32,33 @@ class ProductController extends GetxController {
 
   void fetchProducts() {
     firestore.collection('products').snapshots().listen((snapshot) {
-      products.value = snapshot.docs.map((doc) {
-        var data = doc.data();
-        data['id'] = doc.id;
-        return data;
-      }).toList();
+      final tempList = <ProductModel>[];
+      for (var doc in snapshot.docs) {
+        final data = doc.data();
+        final product = ProductModel.fromMap(doc.id, data);
+        tempList.add(product);
+      }
 
-      // Sinkronisasi produk terfilter dengan semua produk
-      filteredProducts.assignAll(products);
+      products.value = tempList;
+      filteredProducts.assignAll(tempList);
 
-      // Inisialisasi status favorit berdasarkan user saat ini
       _initializeFavorites();
     });
   }
 
   Future<void> _initializeFavorites() async {
-    // Clear isFavorited sebelum menginisialisasi
     isFavorited.clear();
-
-    // Mendapatkan semua productIds
-    List<String> productIds = products.map((product) => product['id'] as String).toList();
-
-    // Ambil semua favorit sekaligus menggunakan Future.wait
-    List<Future<void>> futures = productIds.map((productId) async {
-      DocumentSnapshot favDoc = await firestore
+    for (var product in products) {
+      final favDoc = await firestore
           .collection('products')
-          .doc(productId)
+          .doc(product.id)
           .collection('favorites')
           .doc(currentUserId)
           .get();
-      isFavorited[productId] = (favDoc.exists).obs;
-    }).toList();
-
-    await Future.wait(futures);
+      isFavorited[product.id] = (favDoc.exists).obs;
+    }
   }
 
-  // Fungsi untuk memfilter produk berdasarkan pencarian (teks atau suara)
   void filterProducts(String query) {
     final cleanedQuery = query.trim().toLowerCase();
     if (cleanedQuery.isEmpty) {
@@ -74,10 +66,7 @@ class ProductController extends GetxController {
       _showSnackbar("Pencarian Reset");
     } else {
       filteredProducts.assignAll(
-        products.where((product) {
-          final name = product['name']?.toLowerCase() ?? '';
-          return name.contains(cleanedQuery);
-        }).toList(),
+        products.where((p) => p.name.toLowerCase().contains(cleanedQuery)).toList(),
       );
       if (filteredProducts.isEmpty) {
         _showSnackbar("Pencarian Tidak Ditemukan");
@@ -93,7 +82,7 @@ class ProductController extends GetxController {
     required File? imageFile,
   }) async {
     try {
-      int? parsedPrice = int.tryParse(price);
+      final parsedPrice = int.tryParse(price);
       if (parsedPrice == null) {
         throw Exception("Harga harus berupa angka.");
       }
@@ -110,8 +99,7 @@ class ProductController extends GetxController {
         'likes': 0,
       });
     } catch (e) {
-      print("Error in addProduct: $e");
-      throw e; // Rethrow untuk ditangani di halaman
+      rethrow;
     }
   }
 
@@ -119,8 +107,7 @@ class ProductController extends GetxController {
     try {
       await firestore.collection('products').doc(productId).delete();
     } catch (e) {
-      print("Error in deleteProduct: $e");
-      throw e; // Rethrow untuk ditangani di halaman
+      rethrow;
     }
   }
 
@@ -131,62 +118,59 @@ class ProductController extends GetxController {
     required File? imageFile,
   }) async {
     try {
-      int? parsedPrice = int.tryParse(price);
+      final parsedPrice = int.tryParse(price);
       if (parsedPrice == null) {
         throw Exception("Harga harus berupa angka.");
       }
 
-      Map<String, dynamic> updatedData = {
+      final updatedData = {
         'name': name.isNotEmpty ? name : 'Nama Produk Tidak Tersedia',
         'price': parsedPrice,
       };
 
       if (imageFile != null) {
-        String imageUrl = await _uploadImageToStorage(imageFile, 'product_images');
+        final imageUrl = await _uploadImageToStorage(imageFile, 'product_images');
         updatedData['imageUrl'] = imageUrl;
       }
 
       await firestore.collection('products').doc(productId).update(updatedData);
     } catch (e) {
-      print("Error in editProduct: $e");
-      throw e; // Rethrow untuk ditangani di halaman
+      rethrow;
     }
   }
 
   Future<void> toggleFavorite(int index) async {
     try {
       final product = products[index];
-      final productId = product['id'] as String;
       final favRef = firestore
           .collection('products')
-          .doc(productId)
+          .doc(product.id)
           .collection('favorites')
           .doc(currentUserId);
 
       final favDoc = await favRef.get();
-
       if (favDoc.exists) {
         await favRef.delete();
-        product['likes'] = (product['likes'] ?? 1) - 1;
-        isFavorited[productId]?.value = false;
-        Get.snackbar("Favorit Dihapus", "Favorit Dihapus");
+        final newLikes = (product.likes - 1) < 0 ? 0 : product.likes - 1;
+        await firestore.collection('products').doc(product.id).update({
+          'likes': newLikes,
+        });
+        isFavorited[product.id]?.value = false;
+        _showSnackbar("Favorit Dihapus");
       } else {
         await favRef.set({'userId': currentUserId});
-        product['likes'] = (product['likes'] ?? 0) + 1;
-        isFavorited[productId]?.value = true;
-        Get.snackbar("Favorit Ditambahkan", "Favorit Ditambahkan");
+        final newLikes = product.likes + 1;
+        await firestore.collection('products').doc(product.id).update({
+          'likes': newLikes,
+        });
+        isFavorited[product.id]?.value = true;
+        _showSnackbar("Favorit Ditambahkan");
       }
-
-      await firestore.collection('products').doc(productId).update({
-        'likes': product['likes'],
-      });
     } catch (e) {
-      print("Error in toggleFavorite: $e");
-      throw e; // Rethrow untuk ditangani di halaman
+      rethrow;
     }
   }
 
-  // Fungsi untuk toggle favorit berdasarkan productId
   Future<void> toggleFavoriteById(String productId) async {
     try {
       final favRef = firestore
@@ -194,12 +178,10 @@ class ProductController extends GetxController {
           .doc(productId)
           .collection('favorites')
           .doc(currentUserId);
-
       final favDoc = await favRef.get();
 
       if (favDoc.exists) {
         await favRef.delete();
-        // Update likes
         await firestore.collection('products').doc(productId).update({
           'likes': FieldValue.increment(-1),
         });
@@ -207,7 +189,6 @@ class ProductController extends GetxController {
         _showSnackbar("Favorit Dihapus");
       } else {
         await favRef.set({'userId': currentUserId});
-        // Update likes
         await firestore.collection('products').doc(productId).update({
           'likes': FieldValue.increment(1),
         });
@@ -215,18 +196,15 @@ class ProductController extends GetxController {
         _showSnackbar("Favorit Ditambahkan");
       }
     } catch (e) {
-      print("Error in toggleFavoriteById: $e");
-      throw e;
+      rethrow;
     }
   }
 
-  // Fungsi untuk mereset hasil pencarian
   void resetSearch() {
     filteredProducts.assignAll(products);
     _showSnackbar("Pencarian Reset");
   }
 
-  // Fungsi untuk menampilkan snackbar dengan debounce
   void _showSnackbar(String message) {
     final now = DateTime.now();
     if (now.difference(_snackbarLastShown.value).inSeconds >= 1) {
@@ -236,11 +214,12 @@ class ProductController extends GetxController {
   }
 
   Future<String> _uploadImageToStorage(File imageFile, String folder) async {
-    Reference storageReference = storage.ref().child(
-        '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}');
-    UploadTask uploadTask = storageReference.putFile(imageFile);
-    TaskSnapshot taskSnapshot = await uploadTask.whenComplete(() => null);
-    String imageUrl = await taskSnapshot.ref.getDownloadURL();
+    final storageReference = storage.ref().child(
+      '$folder/${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}',
+    );
+    final uploadTask = storageReference.putFile(imageFile);
+    final taskSnapshot = await uploadTask.whenComplete(() => null);
+    final imageUrl = await taskSnapshot.ref.getDownloadURL();
     return imageUrl;
   }
 }

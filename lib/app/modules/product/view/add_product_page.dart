@@ -1,8 +1,9 @@
+// lib/app/product/views/add_product_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../product/controllers/product_controller.dart';
 import 'dart:io';
+import '../controllers/product_controller.dart';
 
 class AddProductPage extends StatefulWidget {
   const AddProductPage({super.key});
@@ -12,7 +13,7 @@ class AddProductPage extends StatefulWidget {
 }
 
 class _AddProductPageState extends State<AddProductPage> {
-  final ProductController productController = Get.find();
+  final ProductController productController = Get.find<ProductController>();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -22,12 +23,10 @@ class _AddProductPageState extends State<AddProductPage> {
     final picker = ImagePicker();
     try {
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
       setState(() {
         _image = pickedFile != null ? File(pickedFile.path) : null;
       });
     } catch (e) {
-      print("Error picking image: $e");
       Get.snackbar(
         "Error",
         "Terjadi kesalahan saat memilih gambar.",
@@ -77,6 +76,7 @@ class _AddProductPageState extends State<AddProductPage> {
                   labelText: 'Nama Produk',
                 ),
               ),
+              const SizedBox(height: 8),
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
@@ -87,7 +87,6 @@ class _AddProductPageState extends State<AddProductPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  // Validasi Input
                   if (nameController.text.trim().isEmpty ||
                       priceController.text.trim().isEmpty) {
                     Get.snackbar(

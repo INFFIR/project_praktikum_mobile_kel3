@@ -1,11 +1,9 @@
-// edit_product_page.dart
-// ignore_for_file: library_private_types_in_public_api
-
+// lib/app/product/views/edit_product_page.dart
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import '../../product/controllers/product_controller.dart';
 import 'dart:io';
+import '../controllers/product_controller.dart';
 
 class EditProductPage extends StatefulWidget {
   final String productId;
@@ -16,7 +14,7 @@ class EditProductPage extends StatefulWidget {
 }
 
 class _EditProductPageState extends State<EditProductPage> {
-  final ProductController productController = Get.find();
+  final ProductController productController = Get.find<ProductController>();
 
   final TextEditingController nameController = TextEditingController();
   final TextEditingController priceController = TextEditingController();
@@ -31,14 +29,14 @@ class _EditProductPageState extends State<EditProductPage> {
 
   void fetchProductData() async {
     try {
-      var doc = await productController.firestore
+      final doc = await productController.firestore
           .collection('products')
           .doc(widget.productId)
           .get();
-      var data = doc.data();
+      final data = doc.data();
       if (data != null) {
         nameController.text = data['name'] ?? '';
-        priceController.text = data['price'] != null ? data['price'].toString() : '';
+        priceController.text = data['price']?.toString() ?? '';
         setState(() {
           imageUrl = data['imageUrl'];
         });
@@ -53,7 +51,6 @@ class _EditProductPageState extends State<EditProductPage> {
         Get.back();
       }
     } catch (e) {
-      print("Error fetching product data: $e");
       Get.snackbar(
         "Error",
         "Terjadi kesalahan saat mengambil data produk.",
@@ -69,12 +66,10 @@ class _EditProductPageState extends State<EditProductPage> {
     final picker = ImagePicker();
     try {
       final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
       setState(() {
         _image = pickedFile != null ? File(pickedFile.path) : null;
       });
     } catch (e) {
-      print("Error picking image: $e");
       Get.snackbar(
         "Error",
         "Terjadi kesalahan saat memilih gambar.",
@@ -88,7 +83,6 @@ class _EditProductPageState extends State<EditProductPage> {
   @override
   Widget build(BuildContext context) {
     Widget imageWidget;
-
     if (_image != null) {
       imageWidget = Image.file(
         _image!,
@@ -102,7 +96,7 @@ class _EditProductPageState extends State<EditProductPage> {
         height: 200,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
+        errorBuilder: (ctx, err, stack) {
           return Image.asset(
             'assets/product/default.jpg',
             fit: BoxFit.cover,
@@ -132,6 +126,7 @@ class _EditProductPageState extends State<EditProductPage> {
           padding: const EdgeInsets.all(16.0),
           child: Column(
             children: [
+              // Tampilan Gambar
               GestureDetector(
                 onTap: _pickImage,
                 child: imageWidget,
@@ -143,6 +138,7 @@ class _EditProductPageState extends State<EditProductPage> {
                   labelText: 'Nama Produk',
                 ),
               ),
+              const SizedBox(height: 8),
               TextField(
                 controller: priceController,
                 decoration: const InputDecoration(
@@ -153,7 +149,6 @@ class _EditProductPageState extends State<EditProductPage> {
               const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () async {
-                  // Validasi Input
                   if (nameController.text.trim().isEmpty ||
                       priceController.text.trim().isEmpty) {
                     Get.snackbar(

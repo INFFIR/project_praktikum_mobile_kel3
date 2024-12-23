@@ -2,9 +2,13 @@ import 'package:get/get.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/bindings/home_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_admin_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/home/views/home_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/bindings/login_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/login/view/login_page.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/product/bindings/product_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/product/view/add_product_page.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/product/view/edit_product_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welcome_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/connection/bindings/connection_binding.dart';
@@ -50,6 +54,11 @@ GetPage(
       binding: HomeBinding(),
       transition: Transition.fadeIn, // Optional: Add transition effect
     ),
+        GetPage(
+      name: Routes.homeAdmin,
+      page: () => const HomeAdminPage(),
+      transition: Transition.fadeIn, // Optional: Add transition effect
+    ),
     GetPage(
       name: Routes.detailProduct,
       page: () => const DetailProductPage(),
@@ -77,6 +86,19 @@ GetPage(
       page: () => const FavoritePage(),
       binding: FavoriteBinding(),
     ),
-
+      GetPage(
+      name: Routes.productAdd,
+      page: () => const AddProductPage(),
+      binding: ProductBinding(),
+    ),
+    GetPage(
+      name: Routes.productEdit,
+      page: () {
+        // Di contoh ini, kita asumsikan kita pass parameter productId via Get.parameters
+        final productId = Get.parameters['productId'] ?? '';
+        return EditProductPage(productId: productId);
+      },
+      binding: ProductBinding(),
+    ),
   ];
 }
