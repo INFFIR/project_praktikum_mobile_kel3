@@ -1,11 +1,12 @@
+// lib/app/modules/detail_produk/views/video_player.dart
+
 import 'package:flutter/material.dart';
 import 'package:video_player/video_player.dart';
-import 'dart:io';
 
 class VideoPlayerWidget extends StatefulWidget {
-  final File file;
+  final String videoUrl;
 
-  const VideoPlayerWidget({super.key, required this.file});
+  const VideoPlayerWidget({super.key, required this.videoUrl});
 
   @override
   _VideoPlayerWidgetState createState() => _VideoPlayerWidgetState();
@@ -18,7 +19,7 @@ class _VideoPlayerWidgetState extends State<VideoPlayerWidget> {
   @override
   void initState() {
     super.initState();
-    _controller = VideoPlayerController.file(widget.file)
+    _controller = VideoPlayerController.network(widget.videoUrl)
       ..initialize().then((_) {
         setState(() {});
       });

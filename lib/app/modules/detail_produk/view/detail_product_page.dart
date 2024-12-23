@@ -1,10 +1,16 @@
+// lib/app/modules/detail_produk/view/detail_product_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
-import 'dart:io';
-import '../controllers/detail_product_controller.dart';
-import 'detail_person_review.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/controllers/detail_product_controller.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_person_review.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
+import 'package:permission_handler/permission_handler.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/widget/video_player.dart';
+import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
+import 'package:speech_to_text/speech_to_text.dart' as stt;
 
 class DetailProductPage extends StatefulWidget {
   const DetailProductPage({super.key});
@@ -16,38 +22,39 @@ class DetailProductPage extends StatefulWidget {
 class _DetailProductPageState extends State<DetailProductPage> {
   final DetailProductController controller = Get.find();
 
-  void _addReview(double rating, String reviewer, String comment, File? image,
-      File? video) {
+  // Function to add a review
+  void _addReview(double rating, String reviewer, String comment, XFile? image, XFile? video) {
     controller.addReview(rating, reviewer, comment, image, video);
   }
 
+  // Function to show the add review dialog
   void _showAddReviewDialog(BuildContext context) {
     final TextEditingController reviewerController = TextEditingController();
     double rating = 3.0;
-    File? selectedImage;
-    File? selectedVideo;
+    XFile? selectedImage;
+    XFile? selectedVideo;
 
+    // Function to pick image
     Future<void> _pickImage() async {
-      final pickedFile =
-          await ImagePicker().pickImage(source: ImageSource.camera);
+      final pickedFile = await ImagePicker().pickImage(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
-          selectedImage = File(pickedFile.path);
+          selectedImage = pickedFile;
         });
       }
     }
 
+    // Function to pick video
     Future<void> _pickVideo() async {
-      final pickedFile =
-          await ImagePicker().pickVideo(source: ImageSource.camera);
+      final pickedFile = await ImagePicker().pickVideo(source: ImageSource.camera);
       if (pickedFile != null) {
         setState(() {
-          selectedVideo = File(pickedFile.path);
+          selectedVideo = pickedFile;
         });
       }
     }
 
-    // Reset comment sebelum membuka dialog
+    // Reset comment before opening dialog
     controller.commentController.clear();
     controller.commentText.value = '';
 
@@ -87,8 +94,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
                         direction: Axis.horizontal,
                         allowHalfRating: true,
                         itemCount: 5,
-                        itemPadding:
-                            const EdgeInsets.symmetric(horizontal: 4.0),
+                        itemPadding: const EdgeInsets.symmetric(horizontal: 4.0),
                         itemBuilder: (context, _) => const Icon(
                           Icons.star,
                           color: Colors.amber,
@@ -123,9 +129,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
                               ),
                               suffixIcon: IconButton(
                                 icon: Icon(
-                                  controller.isListening.value
-                                      ? Icons.mic_off
-                                      : Icons.mic,
+                                  controller.isListening.value ? Icons.mic_off : Icons.mic,
                                 ),
                                 onPressed: () {
                                   controller.toggleListening();
@@ -158,8 +162,8 @@ class _DetailProductPageState extends State<DetailProductPage> {
                             Navigator.pop(context);
                           } else {
                             Get.snackbar(
-                              "Informasi Tidak Lengkap",
-                              "Harap isi nama reviewer dan komentar.",
+                              "Incomplete Information",
+                              "Please fill in the reviewer name and comment.",
                               snackPosition: SnackPosition.BOTTOM,
                             );
                           }
@@ -177,20 +181,22 @@ class _DetailProductPageState extends State<DetailProductPage> {
     );
   }
 
-  Widget _buildReview(double rating, String reviewer, String date,
-      String comment, File? image, File? video, BuildContext context) {
+  // Function to build individual review widgets
+  Widget _buildReview(Map<String, dynamic> review, BuildContext context) {
+    double parsedRating = review['rating'] as double;
+
     return GestureDetector(
       onTap: () {
         Navigator.push(
           context,
           MaterialPageRoute(
             builder: (context) => DetailPersonReview(
-              rating: rating.toString(),
-              reviewer: reviewer,
-              date: date,
-              comment: comment,
-              image: image,
-              video: video,
+              rating: parsedRating.toString(),
+              reviewer: review['reviewer'],
+              date: review['date'],
+              comment: review['comment'],
+              imageUrl: review['imageUrl'],
+              videoUrl: review['videoUrl'],
             ),
           ),
         );
@@ -209,7 +215,7 @@ class _DetailProductPageState extends State<DetailProductPage> {
               Row(
                 children: [
                   RatingBarIndicator(
-                    rating: rating,
+                    rating: parsedRating,
                     itemBuilder: (context, index) => const Icon(
                       Icons.star,
                       color: Colors.amber,
@@ -220,40 +226,37 @@ class _DetailProductPageState extends State<DetailProductPage> {
                   ),
                   const SizedBox(width: 8),
                   Text(
-                    '$rating/5',
+                    '$parsedRating/5',
                     style: const TextStyle(fontSize: 16, color: Colors.grey),
                   ),
                   const Spacer(),
                   Text(
-                    'By $reviewer',
+                    'By ${review['reviewer']}',
                     style: const TextStyle(fontSize: 16, color: Colors.black54),
                   ),
                 ],
               ),
               const SizedBox(height: 8),
-              Text(date, style: const TextStyle(color: Colors.grey)),
+              Text(review['date'], style: const TextStyle(color: Colors.grey)),
               const SizedBox(height: 8),
-              Text(comment),
-              if (image != null)
+              Text(review['comment']),
+              if (review['imageUrl'] != '')
                 Padding(
                   padding: const EdgeInsets.only(top: 8.0),
-                  child: Image.file(
-                    image,
+                  child: Image.network(
+                    review['imageUrl'],
                     width: double.infinity,
                     height: 200,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text("Image failed to load.");
+                    },
                   ),
                 ),
-              if (video != null)
-                const Padding(
-                  padding: EdgeInsets.only(top: 8.0),
-                  child: Text(
-                    "Click for detail",
-                    style: TextStyle(
-                      color: Colors.blue,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
+              if (review['videoUrl'] != '')
+                Padding(
+                  padding: const EdgeInsets.only(top: 8.0),
+                  child: VideoPlayerWidget(videoUrl: review['videoUrl']),
                 ),
             ],
           ),
@@ -277,76 +280,291 @@ class _DetailProductPageState extends State<DetailProductPage> {
         ),
         centerTitle: true,
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Splash some color',
-              style: TextStyle(
-                fontSize: 24,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Text('White',
-                style: TextStyle(color: Colors.grey, fontSize: 18)),
-            const SizedBox(height: 8),
-            const Text(
-              'Rp.330.000,-',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Center(
-              child: Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
+      body: Obx(() {
+        if (controller.product.value == null) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (!controller.product.value!.exists) {
+          return const Center(child: Text("Product not found."));
+        }
+
+        final data = controller.product.value!.data() as Map<String, dynamic>;
+
+        final String name = data['name'] ?? 'Product Name Unavailable';
+        final int price = data['price'] ?? 0;
+        final String imageUrl = data['imageUrl'] ?? '';
+        final String description = data['description'] ?? 'No description available';
+        final int likes = data['likes'] ?? 0;
+
+        // Widget to display product image
+        Widget imageWidget;
+        if (imageUrl.isNotEmpty && imageUrl.startsWith('http')) {
+          imageWidget = Image.network(
+            imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stack) {
+              return Image.asset(
+                'assets/product/default.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+              );
+            },
+          );
+        } else if (imageUrl.isNotEmpty && imageUrl.startsWith('assets/')) {
+          imageWidget = Image.asset(
+            imageUrl,
+            fit: BoxFit.cover,
+            width: double.infinity,
+            errorBuilder: (context, error, stack) {
+              return Image.asset(
+                'assets/product/default.jpg',
+                fit: BoxFit.cover,
+                width: double.infinity,
+              );
+            },
+          );
+        } else {
+          // If empty or local file
+          imageWidget = Image.asset(
+            'assets/product/default.jpg',
+            fit: BoxFit.cover,
+            width: double.infinity,
+          );
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            children: [
+              // Product Image
+              Container(
+                width: 240,
+                height: 240,
+                margin: const EdgeInsets.only(top: 20),
+                decoration: BoxDecoration(
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(12),
-                  child: Image.asset(
-                    controller.imageAssetPath,
-                    width: 250,
-                    height: 250,
-                    fit: BoxFit.cover,
+                child: imageWidget,
+              ),
+              const SizedBox(height: 30),
+              // Product Name
+              Text(
+                name,
+                style: const TextStyle(
+                  fontSize: 24,
+                  color: Colors.black,
+                  fontFamily: 'Times New Roman',
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // Price
+              Text(
+                'Rp $price,-',
+                style: const TextStyle(
+                  fontSize: 40,
+                  color: Colors.black,
+                  fontFamily: 'Times New Roman',
+                ),
+              ),
+              const SizedBox(height: 20),
+              // Likes and Average Rating
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Icon(
+                    Icons.favorite,
+                    color: Colors.red,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    '$likes likes',
+                    style: const TextStyle(fontSize: 18, color: Colors.black),
+                  ),
+                  const SizedBox(width: 16),
+                  Obx(() => Row(
+                        children: [
+                          RatingBarIndicator(
+                            rating: controller.averageRating.value,
+                            itemBuilder: (context, index) => const Icon(
+                              Icons.star,
+                              color: Colors.amber,
+                            ),
+                            itemCount: 5,
+                            itemSize: 24.0,
+                            direction: Axis.horizontal,
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            controller.averageRating.value.toStringAsFixed(1),
+                            style: const TextStyle(fontSize: 18, color: Colors.black),
+                          ),
+                        ],
+                      )),
+                ],
+              ),
+              const SizedBox(height: 20),
+              // Description
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: Text(
+                  description,
+                  style: const TextStyle(
+                    fontSize: 17,
+                    color: Colors.black,
+                    fontFamily: 'Times New Roman',
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+              const SizedBox(height: 30),
+              // Removed the Row containing Review and Buy Now buttons
+              /*
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Review Button (Removed)
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.toNamed(
+                        Routes.detailProduct, // Adjust route as necessary
+                        arguments: {'productId': controller.productId},
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 20,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      backgroundColor: Colors.black,
+                    ),
+                    child: const Text(
+                      'Review',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  // Buy Now Button (Removed from Row)
+                  ElevatedButton(
+                    onPressed: () {
+                      Get.offNamed(Routes.home);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: 12,
+                        horizontal: 20,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
+                      backgroundColor: Colors.black,
+                      side: const BorderSide(color: Colors.black54),
+                    ),
+                    child: const Text(
+                      'Buy Now',
+                      style: TextStyle(
+                        fontSize: 18,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              */
+              const SizedBox(height: 20),
+              // Reviews Section
+              const Divider(),
+              const Padding(
+                padding: EdgeInsets.symmetric(horizontal: 16.0),
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    'Reviews',
+                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
-            ),
-            const SizedBox(height: 24),
-            const Text(
-              'Reviews',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 8),
-            Expanded(
-              child: Obx(() {
-                return ListView(
-                  children: controller.reviews.map((review) {
-                    return _buildReview(
-                      review['rating'] as double,
-                      review['reviewer'],
-                      review['date'],
-                      review['comment'],
-                      review['image'],
-                      review['video'],
-                      context,
-                    );
-                  }).toList(),
+              const SizedBox(height: 8),
+              Obx(() {
+                if (controller.reviews.isEmpty) {
+                  return const Padding(
+                    padding: EdgeInsets.all(16.0),
+                    child: Text("No reviews yet."),
+                  );
+                }
+                return ListView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: controller.reviews.length,
+                  itemBuilder: (context, index) {
+                    return _buildReview(controller.reviews[index], context);
+                  },
                 );
               }),
+              const SizedBox(height: 20),
+            ],
+          ),
+        );
+      }),
+      // Implementing the bottomNavigationBar with the "Buy Now" button
+      bottomNavigationBar: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: SizedBox(
+          height: 60, // Adjust the height as needed
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: () {
+              // Navigate to the home page or handle the buy now action
+              Get.offNamed(Routes.home);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.black, // Button background color
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(15), // Rounded corners
+              ),
             ),
-          ],
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: const [
+                Text(
+                  'Buy Now',
+                  style: TextStyle(
+                    fontSize: 18,
+                    color: Colors.white, // Text color
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                SizedBox(width: 10),
+                Icon(
+                  Icons.shopping_cart,
+                  color: Colors.white, // Icon color
+                ),
+              ],
+            ),
+          ),
         ),
       ),
+      // Retain the Floating Action Button for adding reviews
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           _showAddReviewDialog(context);
         },
-        child: const Icon(Icons.add),
+        child: const Icon(Icons.add_comment),
+        backgroundColor: Colors.blue, // Customize as needed
+        tooltip: 'Add Review',
       ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

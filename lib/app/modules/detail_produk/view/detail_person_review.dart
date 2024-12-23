@@ -1,15 +1,16 @@
+// lib/app/modules/detail_produk/views/detail_person_review.dart
+
 import 'package:flutter/material.dart';
 import 'package:flutter_rating_bar/flutter_rating_bar.dart';
-import 'dart:io';
-import '../widget/video_player.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/widget/video_player.dart';
 
 class DetailPersonReview extends StatelessWidget {
   final String rating;
   final String reviewer;
   final String date;
   final String comment;
-  final File? image;
-  final File? video;
+  final String imageUrl;
+  final String videoUrl;
 
   const DetailPersonReview({
     super.key,
@@ -17,8 +18,8 @@ class DetailPersonReview extends StatelessWidget {
     required this.reviewer,
     required this.date,
     required this.comment,
-    this.image,
-    this.video,
+    this.imageUrl = '',
+    this.videoUrl = '',
   });
 
   @override
@@ -67,7 +68,7 @@ class DetailPersonReview extends StatelessWidget {
               style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24),
-            if (image != null)
+            if (imageUrl.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(bottom: 16.0),
                 child: Container(
@@ -76,15 +77,18 @@ class DetailPersonReview extends StatelessWidget {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   clipBehavior: Clip.hardEdge,
-                  child: Image.file(
-                    image!,
+                  child: Image.network(
+                    imageUrl,
                     width: double.infinity,
                     height: 250,
                     fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Text("Image failed to load.");
+                    },
                   ),
                 ),
               ),
-            if (video != null)
+            if (videoUrl.isNotEmpty)
               Padding(
                 padding: const EdgeInsets.only(top: 16.0),
                 child: Container(
@@ -93,7 +97,7 @@ class DetailPersonReview extends StatelessWidget {
                     border: Border.all(color: Colors.grey.shade300),
                   ),
                   clipBehavior: Clip.hardEdge,
-                  child: VideoPlayerWidget(file: video!),
+                  child: VideoPlayerWidget(videoUrl: videoUrl),
                 ),
               ),
           ],
