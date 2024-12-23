@@ -309,8 +309,28 @@ class OpenProductPage extends StatelessWidget {
                     // Buy Now
                     ElevatedButton(
                       onPressed: () {
-                        // Kembali ke home
-                        Get.offNamed(Routes.home);
+                        // Ensure product data is available
+                        if (controller.product.value != null && controller.product.value!.exists) {
+                          final String productId = controller.product.value!.id;
+                          final Map<String, dynamic> data = controller.product.value!.data() as Map<String, dynamic>;
+                          final int priceInt = data['price'] ?? 0;
+                          final double amount = priceInt.toDouble();
+
+                          // Navigate to the Payment page with arguments
+                          Get.toNamed(
+                            Routes.payment,
+                            arguments: {
+                              'productId': productId,
+                              'amount': amount,
+                            },
+                          );
+                        } else {
+                          Get.snackbar(
+                            "Error",
+                            "Product data is not available.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
                       },
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(
@@ -332,6 +352,7 @@ class OpenProductPage extends StatelessWidget {
                         ),
                       ),
                     ),
+
                   ],
                 ),
                 const SizedBox(height: 20),

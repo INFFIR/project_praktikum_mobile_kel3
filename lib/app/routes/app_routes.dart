@@ -14,6 +14,7 @@ abstract class Routes {
   static const productEdit = '/product-edit';
   static const promoAdd = '/promo-add';
   static const promoEdit = '/promo-edit';
-  
+  static const payment = '/payment';
+  static const invoice = '/invoice';
   // Tambahkan rute lain di sini jika diperlukan
 }

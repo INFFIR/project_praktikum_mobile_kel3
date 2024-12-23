@@ -15,6 +15,10 @@ import 'package:project_praktikum_mobile_kel3/app/modules/promo/view/add_promo_p
 import 'package:project_praktikum_mobile_kel3/app/modules/promo/view/edit_promo_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/sign_up/bindings/auth_binding.dart.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/sign_up/view/sign_up_screen.dart.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/transaction/bindings/invoice_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/transaction/bindings/payment_binding.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/transaction/views/invoice_page.dart';
+import 'package:project_praktikum_mobile_kel3/app/modules/transaction/views/payment_page.dart';
 import 'package:project_praktikum_mobile_kel3/app/modules/welcome/bindings/welcome_binding.dart';
 import 'package:project_praktikum_mobile_kel3/app/routes/app_routes.dart';
 import '../modules/connection/bindings/connection_binding.dart';
@@ -121,6 +125,16 @@ class AppPages {
       },
       binding: PromoBinding(),
       transition: Transition.fadeIn, // Optional: Add transition effect
+    ),
+        GetPage(
+      name: Routes.payment,
+      page: () => PaymentPage(),
+      binding: PaymentBinding(),
+    ),
+    GetPage(
+      name: Routes.invoice,
+      page: () => InvoicePage(),
+      binding: InvoiceBinding(),
     ),
   ];
 }

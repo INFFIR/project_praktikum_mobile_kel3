@@ -518,15 +518,35 @@ class _DetailProductPageState extends State<DetailProductPage> {
         );
       }),
       // Implementing the bottomNavigationBar with the "Buy Now" button
-      bottomNavigationBar: Padding(
+ bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: SizedBox(
           height: 60, // Adjust the height as needed
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () {
-              // Navigate to the home page or handle the buy now action
-              Get.offNamed(Routes.home);
+              // Ensure product data is available
+              if (controller.product.value != null && controller.product.value!.exists) {
+                final String productId = controller.product.value!.id;
+                final Map<String, dynamic> data = controller.product.value!.data() as Map<String, dynamic>;
+                final int priceInt = data['price'] ?? 0;
+                final double amount = priceInt.toDouble();
+
+                // Navigate to the Payment page with arguments
+                Get.toNamed(
+                  Routes.payment,
+                  arguments: {
+                    'productId': productId,
+                    'amount': amount,
+                  },
+                );
+              } else {
+                Get.snackbar(
+                  "Error",
+                  "Product data is not available.",
+                  snackPosition: SnackPosition.BOTTOM,
+                );
+              }
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.black, // Button background color
