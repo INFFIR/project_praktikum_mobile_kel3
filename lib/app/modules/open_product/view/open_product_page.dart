@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/bindings/detail_product_binding.dart';
-import 'package:project_praktikum_mobile_kel3/app/modules/detail_produk/view/detail_product_page.dart';
 import '../../product/controllers/product_controller.dart';
 
 class OpenProductPage extends StatelessWidget {

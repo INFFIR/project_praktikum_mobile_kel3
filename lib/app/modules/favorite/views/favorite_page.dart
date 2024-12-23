@@ -24,7 +24,7 @@ class FavoritePage extends StatelessWidget {
 
     // Inisialisasi speech_to_text
     final stt.SpeechToText speechToText = stt.SpeechToText();
-
+    Get.put(BottomNavController());
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -224,26 +224,7 @@ class FavoritePage extends StatelessWidget {
         );
       }),
       // Hapus Obx dari bottomNavigationBar
-      bottomNavigationBar: BottomNavBar(
-        currentIndex: 1, // Set currentIndex ke 1 untuk Favorite
-        onTap: (index) {
-          // Navigasi berdasarkan index yang dipilih
-          switch (index) {
-            case 0:
-              Get.offNamed(Routes.home);
-              break;
-            case 1:
-              // Sudah di Favorite, tidak perlu navigasi
-              break;
-            case 2:
-              Get.offNamed(Routes.location);
-              break;
-            case 3:
-              Get.offNamed(Routes.profile);
-              break;
-          }
-        },
-      ),
+      bottomNavigationBar: const BottomNavBar(), // Panggil BottomNavBar secara langsung
     );
   }
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_map/flutter_map.dart';
-import 'package:get/get_rx/src/rx_types/rx_types.dart';
+import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/rx_flutter/rx_obx_widget.dart';
 import 'package:get/get_state_manager/src/simple/get_view.dart';
 import 'package:latlong2/latlong.dart';
@@ -16,8 +16,7 @@ class LocationView extends GetView<LocationController> {
 
   @override
   Widget build(BuildContext context) {
-    final RxInt currentIndex = 2.obs;
-
+  Get.put(BottomNavController());
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -155,14 +154,7 @@ class LocationView extends GetView<LocationController> {
           ),
         ),
       ),
-      bottomNavigationBar: Obx(
-        () => BottomNavBar(
-          currentIndex: currentIndex.value,
-          onTap: (index) {
-            currentIndex.value = index;
-          },
-        ),
-      ),
+      bottomNavigationBar: const BottomNavBar(), // Panggil BottomNavBar secara langsung
     );
   }
 

@@ -19,7 +19,6 @@ class HomePage extends StatelessWidget {
   Widget build(BuildContext context) {
     final PromoController promoController = Get.put(PromoController());
     final ProductController productController = Get.put(ProductController());
-    final RxInt _currentIndex = 0.obs; // Menggunakan RxInt untuk state
 
     // Controller untuk input pencarian
     final TextEditingController searchController = TextEditingController();
@@ -30,7 +29,7 @@ class HomePage extends StatelessWidget {
 
     // Init speech-to-text
     speechToText = stt.SpeechToText();
-
+    Get.put(BottomNavController());
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -231,14 +230,7 @@ class HomePage extends StatelessWidget {
           ),
         );
       }),
-      bottomNavigationBar: Obx(
-        () => BottomNavBar(
-          currentIndex: _currentIndex.value, // Gunakan .value untuk RxInt
-          onTap: (index) {
-            _currentIndex.value = index; // Update currentIndex dengan RxInt
-          },
-        ),
-      ),
+      bottomNavigationBar: const BottomNavBar(), // Panggil BottomNavBar secara langsung
     );
   }
 }
