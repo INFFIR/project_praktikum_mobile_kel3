@@ -10,7 +10,7 @@ import '../controllers/favorite_controller.dart';
 import '../../components/bottom_navbar.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
-
+import '../../product/controllers/product_controller.dart'; // Pastikan ini diimpor
 
 class FavoritePage extends StatelessWidget {
   const FavoritePage({super.key});
@@ -18,6 +18,7 @@ class FavoritePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final FavoriteController favoriteController = Get.find();
+    final ProductController productController = Get.find(); // Pastikan ProductController ditemukan
 
     // Controller untuk input pencarian
     final TextEditingController searchController = TextEditingController();
@@ -25,6 +26,7 @@ class FavoritePage extends StatelessWidget {
     // Inisialisasi speech_to_text
     final stt.SpeechToText speechToText = stt.SpeechToText();
     Get.put(BottomNavController());
+
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
@@ -212,8 +214,18 @@ class FavoritePage extends StatelessWidget {
                         favoriteController.removeFavorite(product['id']);
                       },
                       onTap: () {
-                        // Navigasi ke detail produk jika diperlukan
-                        Get.to(() => OpenProductPage(productIndex: index));
+                        // Cari indeks produk di ProductController.products
+                        final productId = product['id'];
+                        final productIndex = productController.products.indexWhere((p) => p.id == productId);
+                        if (productIndex != -1) {
+                          Get.to(() => OpenProductPage(productIndex: productIndex));
+                        } else {
+                          Get.snackbar(
+                            "Error",
+                            "Produk tidak ditemukan.",
+                            snackPosition: SnackPosition.BOTTOM,
+                          );
+                        }
                       },
                     );
                   },

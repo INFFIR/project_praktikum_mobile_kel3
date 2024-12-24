@@ -6,12 +6,16 @@ import '../../product/controllers/product_controller.dart';
 class FavoriteBinding extends Bindings {
   @override
   void dependencies() {
-    // Inisialisasi ProductController jika belum diinisialisasi
+    // Inisialisasi ProductController secara langsung jika belum diinisialisasi
     if (!Get.isRegistered<ProductController>()) {
-      Get.lazyPut<ProductController>(() => ProductController(), fenix: true);
+      Get.put<ProductController>(ProductController(), permanent: true);
+      print("ProductController telah diinisialisasi dalam FavoriteBinding");
     }
-    
+
     // Inisialisasi FavoriteController
-    Get.lazyPut<FavoriteController>(() => FavoriteController());
+    if (!Get.isRegistered<FavoriteController>()) {
+      Get.put<FavoriteController>(FavoriteController());
+      print("FavoriteController telah diinisialisasi dalam FavoriteBinding");
+    }
   }
 }
